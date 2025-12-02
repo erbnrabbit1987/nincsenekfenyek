@@ -109,7 +109,11 @@ nincsenekfenyek/
 │   ├── TECH_STACK.md     # Tech stack dokumentáció
 │   ├── QUICKSTART.md     # Gyors kezdés
 │   ├── TESTING.md        # Tesztelési dokumentáció
-│   └── TEST_CASES_ISSUES.md  # Tesztesetek issue formátumban
+│   ├── TEST_CASES_ISSUES.md  # Tesztesetek issue formátumban
+│   ├── DEPLOYMENT.md     # Linux szerver deployment útmutató
+│   └── DEPLOYMENT_SUMMARY.md  # Deployment gyors összefoglaló
+├── devel/                 # Development repository (submodule)
+│   └── (forráskód és futtatási fájlok)
 ├── .github/               # GitHub konfiguráció
 │   └── ISSUE_TEMPLATE/   # Issue template-ek
 ├── CHANGELOG.md           # Verziók és változások
@@ -119,7 +123,7 @@ nincsenekfenyek/
 └── README.md              # Ez a fájl
 ```
 
-> **Megjegyzés:** A forráskód, konfigurációs fájlok és futtatáshoz szükséges fájlok jelenleg csak lokálisan tárolódnak, és nem kerülnek a GitHub-ra.
+> **Megjegyzés:** A forráskód egy külön `devel` repository-ban (vagy submodule-ként) található. A dokumentáció itt, a main repository-ban van.
 
 ## Hasznos Linkek
 
@@ -128,8 +132,9 @@ nincsenekfenyek/
 - [Architecture](./docs/ARCHITECTURE.md) - Rendszerarchitektúra
 - [Tech Stack](./docs/TECH_STACK.md) - Technológiai részletek
 - [Quick Start](./docs/QUICKSTART.md) - Gyors kezdés útmutató
+- [Deployment Guide](./docs/DEPLOYMENT.md) - Linux szerver deployment útmutató
+- [Deployment Summary](./docs/DEPLOYMENT_SUMMARY.md) - Deployment gyors összefoglaló
 - [Docker Guide](./DOCKER.md) - Docker használati útmutató
-- [Deployment Scripts](./scripts/README.md) - Deployment scriptek dokumentációja
 - [Changelog](./CHANGELOG.md) - Verziók és változások
 
 ## API Endpoints
