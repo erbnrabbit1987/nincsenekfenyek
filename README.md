@@ -47,7 +47,8 @@ A **Nincsenek Fények!** egy komplex fact-checking és monitoring alkalmazás, a
 
 1. **Repository klónozása:**
 ```bash
-cd /Users/bazsika/Git/nincsenekfenyek
+git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git
+cd nincsenekfenyek
 ```
 
 2. **Deployment script futtatása:**
@@ -74,18 +75,11 @@ cp .env.example .env
 docker-compose up -d
 ```
 
-#### Deployment Scriptek
+#### Deployment
 
-A projekt tartalmaz kényelmes deployment scripteket:
-- `./scripts/deploy.sh` - Fő deployment script
-- `./scripts/status.sh` - Szolgáltatások állapota
-- `./scripts/stop.sh` - Szolgáltatások leállítása
-- `./scripts/logs.sh` - Log megtekintés
-- `./scripts/update.sh` - Szolgáltatások frissítése
+A projekt Docker és Docker Compose segítségével containerizálva van. A deployment scriptek és konfigurációs fájlok lokálisan érhetők el.
 
-Lásd: [Scripts dokumentáció](./scripts/README.md)
-
-Ez elindítja:
+A rendszer a következő szolgáltatásokat tartalmazza:
 - Backend API (port 8000)
 - MongoDB (port 27017)
 - PostgreSQL (port 5432)
@@ -100,35 +94,9 @@ Ez elindítja:
 
 ### Fejlesztés
 
-#### Backend fejlesztés
+A fejlesztési dokumentáció és részletek a [DEVELOPMENT.md](./docs/DEVELOPMENT.md) fájlban találhatók.
 
-1. **Virtual environment létrehozása:**
-```bash
-python3.11 -m venv venv
-source venv/bin/activate  # macOS/Linux
-```
-
-2. **Dependencies telepítése:**
-```bash
-pip install -r requirements.txt
-pip install -r requirements-dev.txt  # Fejlesztési toolok
-```
-
-3. **Alkalmazás indítása:**
-```bash
-uvicorn src.main:app --reload
-```
-
-#### Docker nélkül (helyi adatbázisokkal)
-
-Ha helyben futtatod a MongoDB, PostgreSQL és Redis-t:
-
-```bash
-export MONGODB_URL="mongodb://localhost:27017/nincsenekfenyek"
-export POSTGRESQL_URL="postgresql://postgres:postgres@localhost:5432/nincsenekfenyek"
-export REDIS_URL="redis://localhost:6379/0"
-uvicorn src.main:app --reload
-```
+> **Megjegyzés:** A forráskód és fejlesztési scriptek jelenleg csak lokálisan érhetők el.
 
 ## Projekt Struktúra
 
@@ -139,23 +107,19 @@ nincsenekfenyek/
 │   ├── DEVELOPMENT.md    # Fejlesztési dokumentáció
 │   ├── ARCHITECTURE.md   # Architektúra dokumentáció
 │   ├── TECH_STACK.md     # Tech stack dokumentáció
-│   └── QUICKSTART.md     # Gyors kezdés
-├── src/                   # Backend forráskód
-│   ├── api/              # API routes
-│   ├── config/           # Konfiguráció
-│   ├── models/           # Adatmodell
-│   ├── services/         # Business logika
-│   ├── utils/            # Segédfüggvények
-│   ├── main.py           # Entry point
-│   └── celery_app.py     # Celery konfiguráció
-├── tests/                 # Tesztek
-├── scripts/               # Utility scriptek
-├── migrations/            # DB migrációk
-├── docker-compose.yml     # Docker Compose config
-├── Dockerfile             # Backend Docker image
-├── requirements.txt       # Python dependencies
+│   ├── QUICKSTART.md     # Gyors kezdés
+│   ├── TESTING.md        # Tesztelési dokumentáció
+│   └── TEST_CASES_ISSUES.md  # Tesztesetek issue formátumban
+├── .github/               # GitHub konfiguráció
+│   └── ISSUE_TEMPLATE/   # Issue template-ek
+├── CHANGELOG.md           # Verziók és változások
+├── SECURITY.md            # Biztonsági útmutató
+├── GIT_SETUP.md           # Git beállítási útmutató
+├── GITHUB_SSH_SETUP.md    # GitHub SSH beállítás
 └── README.md              # Ez a fájl
 ```
+
+> **Megjegyzés:** A forráskód, konfigurációs fájlok és futtatáshoz szükséges fájlok jelenleg csak lokálisan tárolódnak, és nem kerülnek a GitHub-ra.
 
 ## Hasznos Linkek
 

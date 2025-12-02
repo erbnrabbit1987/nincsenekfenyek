@@ -1,2 +1,0 @@
-"""Fact-checking services package"""
-

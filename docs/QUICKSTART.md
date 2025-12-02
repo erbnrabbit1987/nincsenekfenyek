@@ -14,7 +14,8 @@ Ez a dokumentum segít a projekt gyors elindításában.
 ### 1. Repository Klónozása
 
 ```bash
-cd /Users/bazsika/Git/nincsenekfenyek
+git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git
+cd nincsenekfenyek
 ```
 
 ### 2. Környezeti Változók Beállítása

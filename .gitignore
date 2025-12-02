@@ -125,3 +125,52 @@ docker-compose.override.yml
 *.bak
 *.backup
 
+# ===========================================
+# KÓD FÁJLOK - CSAK LOKÁLISAN
+# ===========================================
+# A következő fájlok NEM kerülnek a GitHub-ra,
+# csak lokálisan tárolódnak
+
+# Source code
+src/
+!src/.gitkeep
+
+# Application files
+*.py
+!scripts/*.sh
+!**/__init__.py
+
+# Configuration files
+docker-compose.yml
+Dockerfile
+requirements.txt
+requirements-dev.txt
+
+# Test files
+tests/
+!tests/.gitkeep
+
+# Scripts (kivéve dokumentációs scripteket)
+scripts/
+!.github/
+!scripts/README*.md
+!scripts/*TESTING*.md
+
+# Migrations
+migrations/
+!migrations/.gitkeep
+
+# Frontend (ha lesz)
+frontend/
+!frontend/README.md
+
+# Environment and config
+.env
+.env.*
+!.env.example
+
+# Logs and data
+logs/
+data/
+*.log
+
