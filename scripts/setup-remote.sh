@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Git Remote Setup Script
-# Ez a script segít beállítani a remote repository-t és feltölteni a kódot
+# Git Remote Setup Script - GitHub SSH
+# Egyszerűsített verzió SSH autentikációval
 
 set -e
 
@@ -27,13 +27,9 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-log_question() {
-    echo -e "${BLUE}[?]${NC} $1"
-}
-
 cd "$PROJECT_ROOT"
 
-echo "=== Git Remote Repository Beállítás ==="
+echo "=== GitHub Remote Repository Beállítás (SSH) ==="
 echo ""
 
 # Check if remote already exists
@@ -52,65 +48,30 @@ if git remote | grep -q "origin"; then
 fi
 
 echo ""
-log_question "Milyen git szolgáltatást használsz?"
-echo "1) GitHub"
-echo "2) GitLab"
-echo "3) Egyéb (saját URL)"
+log_warn "Előbb hozd létre a repository-t GitHub-on:"
 echo ""
-read -p "Válasz (1-3): " service_choice
-
-case $service_choice in
-    1)
-        echo ""
-        log_question "Add meg a GitHub felhasználóneved vagy szervezet neved:"
-        read -p "Username/Org: " username
-        echo ""
-        log_question "Létrehoztad már a repository-t GitHub-on? (y/N):"
-        read -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log_warn "Először hozd létre a repository-t GitHub-on:"
-            echo "  1. Menj ide: https://github.com/new"
-            echo "  2. Nevezd el: nincsenekfenyek"
-            echo "  3. Ne inicializáld README, .gitignore vagy licencel"
-            echo "  4. Kattints 'Create repository'"
-            echo ""
-            read -p "Nyomj Enter-t, ha létrehoztad a repository-t..."
-        fi
-        repo_url="https://github.com/${username}/nincsenekfenyek.git"
-        ;;
-    2)
-        echo ""
-        log_question "Add meg a GitLab felhasználóneved vagy szervezet neved:"
-        read -p "Username/Org: " username
-        echo ""
-        log_question "Létrehoztad már a repository-t GitLab-on? (y/N):"
-        read -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-            log_warn "Először hozd létre a repository-t GitLab-on:"
-            echo "  1. Menj a GitLab projektedhez"
-            echo "  2. Kattints 'New project'"
-            echo "  3. Válaszd 'Create blank project'"
-            echo "  4. Nevezd el: nincsenekfenyek"
-            echo ""
-            read -p "Nyomj Enter-t, ha létrehoztad a repository-t..."
-        fi
-        repo_url="https://gitlab.com/${username}/nincsenekfenyek.git"
-        ;;
-    3)
-        echo ""
-        log_question "Add meg a teljes repository URL-t:"
-        read -p "Repository URL: " repo_url
-        ;;
-    *)
-        log_error "Érvénytelen válasz"
-        exit 1
-        ;;
-esac
+echo "  1. Menj ide: https://github.com/new"
+echo "  2. Nevezd el: nincsenekfenyek (vagy amit szeretnél)"
+echo "  3. Válaszd ki a visibility-t (public/private)"
+echo "  4. NE inicializáld README, .gitignore vagy licencel"
+echo "  5. Kattints 'Create repository'"
+echo ""
+read -p "Nyomj Enter-t, ha létrehoztad a repository-t..."
 
 echo ""
-log_info "Remote repository hozzáadása: $repo_url"
+log_info "Add meg a repository teljes elérési útját (pl: username/nincsenekfenyek)"
+read -p "Repository path (username/repo-name): " repo_path
+
+if [ -z "$repo_path" ]; then
+    log_error "Repository path nem lehet üres!"
+    exit 1
+fi
+
+# Build SSH URL
+repo_url="git@github.com:${repo_path}.git"
+
+echo ""
+log_info "Remote repository beállítása: $repo_url"
 git remote add origin "$repo_url"
 
 echo ""
@@ -122,18 +83,24 @@ if [ "$current_branch" != "main" ]; then
 fi
 
 echo ""
-log_question "Szeretnéd most feltölteni a kódot? (Y/n):"
-read -n 1 -r
+read -p "Szeretnéd most feltölteni a kódot? (Y/n): " -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-    log_info "Kód feltöltése..."
-    git push -u origin main
-    echo ""
-    log_info "✅ Sikeresen feltöltve a remote repository-ba!"
-    echo ""
-    echo "Repository URL: $repo_url"
+    log_info "Kód feltöltése SSH-val..."
+    if git push -u origin main; then
+        echo ""
+        log_info "✅ Sikeresen feltöltve a GitHub repository-ba!"
+        echo ""
+        echo "Repository URL: https://github.com/${repo_path}"
+    else
+        log_error "Hiba történt a feltöltés során."
+        log_info "Ellenőrizd:"
+        echo "  - Létezik-e a repository GitHub-on?"
+        echo "  - Van-e jogosultságod a repository-hoz?"
+        echo "  - Működik-e az SSH kapcsolat? (ssh -T git@github.com)"
+        exit 1
+    fi
 else
     log_info "Később feltöltheted a következő paranccsal:"
     echo "  git push -u origin main"
 fi
-
