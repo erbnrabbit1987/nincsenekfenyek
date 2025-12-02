@@ -1,0 +1,73 @@
+name: 📥 Bug Report - Adatgyűjtés
+description: Adatgyűjtés modul bug jelentése
+title: "[BUG-COLLECT] "
+labels: ["bug", "collection"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Köszönjük, hogy jelentetted a bugot! Kérlek, töltsd ki az alábbi mezőket részletesen.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioritás
+      options:
+        - P1 - Critical
+        - P2 - High
+        - P3 - Medium
+        - P4 - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: collector_type
+    attributes:
+      label: Gyűjtő Típusa
+      options:
+        - Facebook Scraping
+        - RSS Feed Reader
+        - Web Scraper
+        - Statistics Collector (EUROSTAT)
+        - Celery Worker
+        - Egyéb
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Leírás
+      placeholder: Mit csinál rosszul az adatgyűjtés?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Lépések a hiba reprodukálásához
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_result
+    attributes:
+      label: Aktuális Eredmény
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_result
+    attributes:
+      label: Elvárt Eredmény
+    validations:
+      required: true
+
+  - type: textarea
+    id: celery_logs
+    attributes:
+      label: Celery Logok
+      description: Celery worker logok (ha releváns)
+    validations:
+      required: false
+

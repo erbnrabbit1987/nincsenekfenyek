@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Dokumentáció
+    url: https://github.com/erbnrabbit1987/nincsenekfenyek/tree/main/docs
+    about: Tekintsd meg a projekt dokumentációját
+  - name: 🧪 Tesztesetek
+    url: https://github.com/erbnrabbit1987/nincsenekfenyek/issues?q=is%3Aissue+label%3Atest-case
+    about: Tekintsd meg a teszteseteket
+  - name: 📋 Use Cases
+    url: https://github.com/erbnrabbit1987/nincsenekfenyek/blob/main/USE_CASES.md
+    about: Tekintsd meg a use case dokumentációt
+

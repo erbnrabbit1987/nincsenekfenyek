@@ -1,0 +1,79 @@
+name: 📡 Bug Report - Forráskezelés
+description: Forráskezelés modul bug jelentése
+title: "[BUG-SOURCE] "
+labels: ["bug", "source"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Köszönjük, hogy jelentetted a bugot! Kérlek, töltsd ki az alábbi mezőket részletesen.
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Prioritás
+      options:
+        - P1 - Critical
+        - P2 - High
+        - P3 - Medium
+        - P4 - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Súlyosság
+      options:
+        - Critical - Alkalmazás nem használható
+        - High - Fő funkció nem működik
+        - Medium - Funkció részben működik
+        - Low - Kisebb probléma
+    validations:
+      required: true
+
+  - type: dropdown
+    id: source_type
+    attributes:
+      label: Forrás Típusa
+      options:
+        - Facebook
+        - Híroldal (News)
+        - Statisztikai (EUROSTAT, KSH)
+        - Forráscsoport
+        - Egyéb
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Leírás
+      placeholder: Mit csinál rosszul a forráskezelés?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Lépések a hiba reprodukálásához
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual_result
+    attributes:
+      label: Aktuális Eredmény
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_result
+    attributes:
+      label: Elvárt Eredmény
+    validations:
+      required: true
+
