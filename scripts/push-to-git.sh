@@ -17,8 +17,6 @@ if ! git remote | grep -q "origin"; then
     echo "Futtasd először:"
     echo "  ./scripts/setup-remote.sh"
     echo ""
-    echo "Vagy állítsd be manuálisan:"
-    echo "  git remote add origin YOUR_REPOSITORY_URL"
     exit 1
 fi
 
@@ -53,4 +51,3 @@ git push -u origin "$current_branch"
 
 echo ""
 echo "✅ Sikeresen feltöltve!"
-
