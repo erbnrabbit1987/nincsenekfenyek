@@ -43,21 +43,47 @@ A **Nincsenek Fények!** egy komplex fact-checking és monitoring alkalmazás, a
 
 ### Telepítés és Futtatás
 
+#### Gyors Deployment (Ajánlott)
+
 1. **Repository klónozása:**
 ```bash
 cd /Users/bazsika/Git/nincsenekfenyek
 ```
 
-2. **Környezeti változók beállítása:**
+2. **Deployment script futtatása:**
+```bash
+./scripts/deploy.sh -b
+```
+
+Ez automatikusan:
+- Ellenőrzi az előfeltételeket (Docker, Docker Compose)
+- Létrehozza a `.env` fájlt ha hiányzik
+- Build-eli a Docker image-eket
+- Indítja az összes szolgáltatást
+
+#### Manuális Telepítés
+
+1. **Környezeti változók beállítása:**
 ```bash
 cp .env.example .env
 # Szerkeszd a .env fájlt a szükséges értékekkel
 ```
 
-3. **Docker konténerek indítása:**
+2. **Docker konténerek indítása:**
 ```bash
 docker-compose up -d
 ```
+
+#### Deployment Scriptek
+
+A projekt tartalmaz kényelmes deployment scripteket:
+- `./scripts/deploy.sh` - Fő deployment script
+- `./scripts/status.sh` - Szolgáltatások állapota
+- `./scripts/stop.sh` - Szolgáltatások leállítása
+- `./scripts/logs.sh` - Log megtekintés
+- `./scripts/update.sh` - Szolgáltatások frissítése
+
+Lásd: [Scripts dokumentáció](./scripts/README.md)
 
 Ez elindítja:
 - Backend API (port 8000)
@@ -138,6 +164,8 @@ nincsenekfenyek/
 - [Architecture](./docs/ARCHITECTURE.md) - Rendszerarchitektúra
 - [Tech Stack](./docs/TECH_STACK.md) - Technológiai részletek
 - [Quick Start](./docs/QUICKSTART.md) - Gyors kezdés útmutató
+- [Docker Guide](./DOCKER.md) - Docker használati útmutató
+- [Deployment Scripts](./scripts/README.md) - Deployment scriptek dokumentációja
 - [Changelog](./CHANGELOG.md) - Verziók és változások
 
 ## API Endpoints

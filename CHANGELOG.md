@@ -7,6 +7,14 @@ A formátum a [Keep a Changelog](https://keepachangelog.com/hu/1.0.0/) alapján 
 ## [Unreleased]
 
 ### Hozzáadva
+- Deployment scriptek komplett szettel
+  - `deploy.sh` - Fő deployment script (development/production)
+  - `deploy-production.sh` - Production deployment backup-pel
+  - `stop.sh` - Szolgáltatások leállítása
+  - `status.sh` - Szolgáltatások állapot ellenőrzése
+  - `logs.sh` - Log megtekintés és követés
+  - `update.sh` - Szolgáltatások frissítése
+- Deployment scriptek dokumentációja
 - Tech stack döntések dokumentálása (Python, MongoDB, PostgreSQL előkészítés, React)
 - Docker és Docker Compose konfiguráció
 - FastAPI backend alapok
@@ -18,8 +26,8 @@ A formátum a [Keep a Changelog](https://keepachangelog.com/hu/1.0.0/) alapján 
 - Docker használati útmutató
 
 ### Módosítva
+- README frissítve deployment scriptekkel és gyors deployment útmutatóval
 - Architektúra dokumentáció frissítve tech stack választásokkal
-- README frissítve Docker használati útmutatóval
 
 ## [0.1.0] - 2024-01-XX
 
