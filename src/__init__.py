@@ -1,0 +1,2 @@
+"""Nincsenek Fények! - Main package"""
+

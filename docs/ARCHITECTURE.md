@@ -84,7 +84,7 @@ A **Nincsenek Fények!** egy moduláris, skálázható fact-checking és monitor
 - Beállítások és konfiguráció
 - Dashboard adatok összeállítása
 
-**Technológia**: [Még meghatározandó - Python/Node.js]
+**Technológia**: **Python** (FastAPI/Flask) - Fact-checking és NLP feladatokhoz optimális
 
 ---
 
@@ -99,14 +99,15 @@ A **Nincsenek Fények!** egy moduláris, skálázható fact-checking és monitor
 - Időzített feladatok (cron jobs)
 
 **Komponensek**:
-- **Facebook Collector**: Facebook Graph API vagy scraping
+- **Facebook Collector**: Web scraping (kezdetben), Meta Graph API előkészítés
 - **RSS Collector**: RSS feed olvasó
 - **Web Scraper**: Híroldal scraping (ha RSS nincs)
-- **Statistics Collector**: Statisztikai API integrációk
+- **Statistics Collector**: Statisztikai API integrációk (EUROSTAT, KSH)
 
 **Technológia**: 
-- Background job processor (Celery, Bull Queue, stb.)
-- Scheduler (APScheduler, node-cron)
+- Background job processor: **Celery** (Python)
+- Scheduler: **APScheduler** vagy Celery Beat
+- Web Scraping: **Scrapy** vagy **BeautifulSoup** + **Selenium**
 
 ---
 
@@ -129,8 +130,9 @@ A **Nincsenek Fények!** egy moduláris, skálázható fact-checking és monitor
 - **Report Generator**: Jelentések generálása
 
 **Technológia**:
-- NLP library (spaCy, NLTK - Python vagy hasonló)
-- Search engine (Elasticsearch opcionális)
+- NLP library: **spaCy** (magyar nyelvi modell támogatással)
+- Text processing: **NLTK**, **transformers** (Hugging Face)
+- Search engine: **Elasticsearch** (opcionális, később)
 
 ---
 
@@ -241,9 +243,9 @@ Statistics
 ## Integrációk
 
 ### Facebook Integration
-- **API**: Meta Graph API (ha elérhető)
-- **Alternatíva**: Web scraping (jogi megfontolásokkal)
-- **Auth**: OAuth flow (ha API)
+- **Kezdeti**: **Web scraping** (Scrapy/BeautifulSoup + Selenium)
+- **Előkészítés**: **Meta Graph API** (OAuth flow)
+- **Jogi megjegyzés**: Jogászok dolgoznak rajta, személyes adatot nem kezel
 
 ### Statisztikai Portálok
 - **EUROSTAT**: REST API
@@ -258,29 +260,32 @@ Statistics
 
 ## Adatbázis
 
-### Opciók (eldöntendő)
-1. **PostgreSQL**: Relációs, komplex query-khez, full-text search
-2. **MongoDB**: Dokumentum-orientált, flexibilis séma
-3. **Hybrid**: PostgreSQL + Redis (cache, queue)
+### Stratégia
+**Kezdeti**: **MongoDB** - Flexibilis séma, gyors fejlesztéshez
+**Előkészítés**: **PostgreSQL** - Későbbi migrációhoz, komplex query-khez, full-text search
 
-### Szempontok
-- Adatok természete (strukturált vs. flexibilis)
-- Query komplexitás
-- Skálázhatóság
-- Számlálási költség
+### Hybrid Megközelítés
+- **MongoDB**: Fő adattárolás (posztok, források, fact-check eredmények)
+- **PostgreSQL**: Strukturált adatok, komplex query-k, full-text search (később)
+- **Redis**: Cache és message queue
+
+### Migrációs Terv
+- Adatbázis absztrakciós réteg (ORM/ODM) amelyik mindkettőt támogatja
+- Későbbi migráció lehetősége PostgreSQL-re
 
 ---
 
 ## Infrastruktúra
 
 ### Development
+- **Docker** + **Docker Compose** - Teljes környezet containerizálva
 - Local development environment
-- Docker Compose (adatrepozitóriumok, Redis, stb.)
+- MongoDB, PostgreSQL, Redis konténerek
 
 ### Production (Tervezési fázis)
 - Cloud provider (AWS, GCP, Azure - eldöntendő)
-- Containerization (Docker)
-- Orchestration (Kubernetes opcionális)
+- **Containerization**: Docker (mindig)
+- **Orchestration**: Docker Compose kezdetben, Kubernetes később (skálázhatóság)
 - CI/CD Pipeline
 - Monitoring és Logging
 
@@ -293,11 +298,11 @@ Statistics
 - Fact-checking folyamatok
 - Email/értesítési küldés
 
-### Technológia Opciók
-- **Redis + Celery** (Python)
-- **Redis + Bull Queue** (Node.js)
-- **RabbitMQ**
-- **AWS SQS** (cloud)
+### Technológia
+- **Redis + Celery** (Python) - Választott megoldás
+- Redis message broker
+- Celery worker processes
+- Celery Beat scheduler időzített feladatokhoz
 
 ---
 
