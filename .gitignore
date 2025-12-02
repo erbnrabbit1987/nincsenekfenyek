@@ -84,6 +84,40 @@ credentials/
 *.key
 *.crt
 
+# SSH Keys - NEVER commit these!
+.ssh/
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+id_ecdsa
+id_ecdsa.pub
+*.pub
+known_hosts
+known_hosts.old
+
+# Git credentials
+.git-credentials
+.gitconfig.local
+
+# API Keys and tokens
+*_key.txt
+*_secret.txt
+*_token.txt
+*.token
+api_keys.txt
+secrets.txt
+
+# Environment files (all variants)
+.env
+.env.*
+!.env.example
+.env.local
+.env.production
+.env.development
+.env.test
+.env.staging
+
 # Docker
 docker-compose.override.yml
 
