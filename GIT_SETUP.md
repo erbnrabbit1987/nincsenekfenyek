@@ -9,7 +9,9 @@
 
 ## Remote Repository Beállítása
 
-### Opció 1: GitHub Repository
+### 🚀 Gyors Setup (SSH - Ajánlott)
+
+**Ha SSH-val tudsz authentikálni GitHub-ra:**
 
 1. **Repository létrehozása GitHub-on:**
    - Menj a https://github.com/new
@@ -17,11 +19,24 @@
    - Ne inicializáld README, .gitignore vagy licencel
    - Kattints "Create repository"
 
-2. **Remote hozzáadása:**
+2. **Egyszerű script futtatása:**
 ```bash
-git remote add origin https://github.com/USERNAME/nincsenekfenyek.git
-# VAGY SSH-val:
-# git remote add origin git@github.com:USERNAME/nincsenekfenyek.git
+./scripts/setup-github-ssh.sh
+```
+
+A script kérni fogja a repository elérési útját (pl: `username/nincsenekfenyek`) és SSH-val beállítja.
+
+### Opció 1: GitHub Repository (Manuális SSH)
+
+1. **Repository létrehozása GitHub-on:**
+   - Menj a https://github.com/new
+   - Nevezd el: `nincsenekfenyek`
+   - Ne inicializáld README, .gitignore vagy licencel
+   - Kattints "Create repository"
+
+2. **Remote hozzáadása SSH-val:**
+```bash
+git remote add origin git@github.com:USERNAME/nincsenekfenyek.git
 ```
 
 3. **Push első alkalommal:**
