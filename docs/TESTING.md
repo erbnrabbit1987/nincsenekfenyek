@@ -717,3 +717,5 @@ Minden tesztelési ciklus után készül egy tesztelési jelentés, amely tartal
 
 **Dokumentum Vég**
 
+
+

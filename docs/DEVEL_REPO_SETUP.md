@@ -157,3 +157,5 @@ devel/
 - [Deployment Összefoglaló](./DEPLOYMENT_SUMMARY.md)
 - [Server Setup Lépések](./SERVER_SETUP_STEPS.md)
 
+
+

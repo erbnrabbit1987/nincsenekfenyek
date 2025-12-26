@@ -445,3 +445,5 @@ docker-compose build && docker-compose up -d
 - [Gyors Összefoglaló](./DEPLOYMENT_SUMMARY.md)
 - [Docker Guide](../DOCKER.md)
 
+
+

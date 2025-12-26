@@ -220,3 +220,5 @@ Teszteljük a tényalapú keresés funkcionalitását.
 
 *Ez a dokumentum folyamatosan bővül további tesztesetekkel...*
 
+
+

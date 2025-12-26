@@ -54,3 +54,5 @@ npm run build
 
 **Megjegyzés**: A frontend még nincs implementálva. Ez a fájl a későbbi fejlesztéshez készült.
 
+
+

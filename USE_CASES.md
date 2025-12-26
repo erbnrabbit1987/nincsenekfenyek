@@ -182,3 +182,5 @@ A "Nincsenek Fények!" egy fact-checking és információs monitoring alkalmazá
 5. **Deployment:** Hol fog futni? (cloud, saját szerver?)
 6. **Részletes fact-checking:** Manuális review lehetősége is kell, vagy teljesen automatikus?
 
+
+

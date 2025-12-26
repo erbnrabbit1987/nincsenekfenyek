@@ -333,3 +333,5 @@ docker-compose up -d
 **Utolsó frissítés:** 2024. december 2.  
 **Frissítve általa:** Auto (AI Assistant)
 
+
+

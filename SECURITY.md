@@ -99,3 +99,5 @@ A `.gitignore` fájl már tartalmazza a bizalmas fájltípusokat:
 
 **Fontos:** Ha bármilyen bizalmas információ kerülne a repository-ba, azonnal értesítsd a projekt maintainerét!
 
+
+
