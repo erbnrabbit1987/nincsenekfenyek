@@ -3,9 +3,12 @@ import { healthApi } from '../lib/api';
 import { CheckCircle2, AlertCircle, Server, Key } from 'lucide-react';
 
 export default function Settings() {
-  const { data: health } = useQuery({
+  const { data: health } = useQuery<{ status: string }>({
     queryKey: ['health'],
-    queryFn: () => healthApi.check().then(res => res.data),
+    queryFn: async () => {
+      const res = await healthApi.check();
+      return res.data;
+    },
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 

@@ -1,28 +1,37 @@
 import { useQuery } from '@tanstack/react-query';
-import { collectionApi, sourcesApi, factcheckApi } from '../lib/api';
-import { FileText, Source, CheckCircle2, TrendingUp, Activity } from 'lucide-react';
+import { collectionApi, sourcesApi, factcheckApi, type Source, type Post, type FactCheckResult } from '../lib/api';
+import { FileText, Database, CheckCircle2, Activity } from 'lucide-react';
 
 export default function Dashboard() {
-  const { data: sources } = useQuery({
+  const { data: sources } = useQuery<Source[]>({
     queryKey: ['sources'],
-    queryFn: () => sourcesApi.list().then(res => res.data),
+    queryFn: async () => {
+      const res = await sourcesApi.list();
+      return res.data;
+    },
   });
 
-  const { data: posts } = useQuery({
+  const { data: posts } = useQuery<Post[]>({
     queryKey: ['posts', 'recent'],
-    queryFn: () => collectionApi.getPosts({ limit: 10 }).then(res => res.data),
+    queryFn: async () => {
+      const res = await collectionApi.getPosts({ limit: 10 });
+      return res.data;
+    },
   });
 
-  const { data: factchecks } = useQuery({
+  const { data: factchecks } = useQuery<FactCheckResult[]>({
     queryKey: ['factchecks', 'recent'],
-    queryFn: () => factcheckApi.listResults({ limit: 10 }).then(res => res.data),
+    queryFn: async () => {
+      const res = await factcheckApi.listResults({ limit: 10 });
+      return res.data;
+    },
   });
 
   const stats = [
     {
       name: 'Aktív Források',
       value: sources?.length || 0,
-      icon: Source,
+      icon: Database,
       color: 'bg-blue-500',
     },
     {
@@ -87,7 +96,7 @@ export default function Dashboard() {
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
           {posts && posts.length > 0 ? (
-            posts.map((post) => (
+            posts.map((post: Post) => (
               <div key={post._id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
                 <div className="flex items-center justify-between">
                   <div className="flex-1">

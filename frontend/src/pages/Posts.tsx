@@ -26,7 +26,7 @@ export default function Posts() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {posts && posts.length > 0 ? (
-              posts.map((post) => (
+              posts.map((post: Post) => (
                 <Link
                   key={post._id}
                   to={`/posts/${post._id}`}

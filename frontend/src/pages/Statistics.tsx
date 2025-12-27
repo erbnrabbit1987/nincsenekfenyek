@@ -9,13 +9,19 @@ export default function Statistics() {
 
   const { data: eurostatResults, isLoading: eurostatLoading } = useQuery({
     queryKey: ['eurostat', eurostatQuery],
-    queryFn: () => statisticsApi.eurostat.search(eurostatQuery).then(res => res.data),
+    queryFn: async () => {
+      const res = await statisticsApi.eurostat.search(eurostatQuery);
+      return res.data;
+    },
     enabled: eurostatQuery.length > 2,
   });
 
   const { data: kshResults, isLoading: kshLoading } = useQuery({
     queryKey: ['ksh', kshQuery],
-    queryFn: () => statisticsApi.ksh.search(kshQuery).then(res => res.data),
+    queryFn: async () => {
+      const res = await statisticsApi.ksh.search(kshQuery);
+      return res.data;
+    },
     enabled: kshQuery.length > 2,
   });
 

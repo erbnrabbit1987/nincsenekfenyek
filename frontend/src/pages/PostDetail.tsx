@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collectionApi, factcheckApi } from '../lib/api';
-import { ArrowLeft, CheckCircle2, ExternalLink, RefreshCw } from 'lucide-react';
+import { collectionApi, factcheckApi, type Post, type FactCheckResult } from '../lib/api';
+import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { hu } from 'date-fns/locale';
 
@@ -9,20 +9,29 @@ export default function PostDetail() {
   const { id } = useParams<{ id: string }>();
   const queryClient = useQueryClient();
 
-  const { data: post, isLoading } = useQuery({
+  const { data: post, isLoading } = useQuery<Post>({
     queryKey: ['post', id],
-    queryFn: () => collectionApi.getPost(id!).then(res => res.data),
+    queryFn: async () => {
+      const res = await collectionApi.getPost(id!);
+      return res.data;
+    },
     enabled: !!id,
   });
 
-  const { data: factcheck } = useQuery({
+  const { data: factcheck } = useQuery<FactCheckResult>({
     queryKey: ['factcheck', id],
-    queryFn: () => factcheckApi.getResult(id!).then(res => res.data),
+    queryFn: async () => {
+      const res = await factcheckApi.getResult(id!);
+      return res.data;
+    },
     enabled: !!id,
   });
 
-  const factcheckMutation = useMutation({
-    mutationFn: () => factcheckApi.checkPost(id!).then(res => res.data),
+  const factcheckMutation = useMutation<FactCheckResult>({
+    mutationFn: async () => {
+      const res = await factcheckApi.checkPost(id!);
+      return res.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['factcheck', id] });
     },
@@ -140,7 +149,7 @@ export default function PostDetail() {
                 Kinyert Állítások ({factcheck.claims.length})
               </h3>
               <div className="space-y-2">
-                {factcheck.claims.map((claim, index) => (
+                {factcheck.claims.map((claim: { text: string; type: string; confidence: number }, index: number) => (
                   <div
                     key={index}
                     className="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg"
@@ -161,7 +170,7 @@ export default function PostDetail() {
                 Hivatkozások ({factcheck.references.length})
               </h3>
               <div className="space-y-3">
-                {factcheck.references.map((ref, index) => (
+                {factcheck.references.map((ref: { type: string; source: string; title?: string; url?: string; snippet?: string; relevance_score: number }, index: number) => (
                   <div
                     key={index}
                     className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg"

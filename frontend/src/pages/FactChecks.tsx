@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { factcheckApi } from '../lib/api';
+import { factcheckApi, type FactCheckResult } from '../lib/api';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -7,9 +7,12 @@ import { hu } from 'date-fns/locale';
 import clsx from 'clsx';
 
 export default function FactChecks() {
-  const { data: factchecks, isLoading } = useQuery({
+  const { data: factchecks, isLoading } = useQuery<FactCheckResult[]>({
     queryKey: ['factchecks'],
-    queryFn: () => factcheckApi.listResults({ limit: 50 }).then(res => res.data),
+    queryFn: async () => {
+      const res = await factcheckApi.listResults({ limit: 50 });
+      return res.data.items || res.data;
+    },
   });
 
   const getVerdictIcon = (verdict: string) => {
@@ -55,7 +58,7 @@ export default function FactChecks() {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {factchecks && factchecks.length > 0 ? (
-              factchecks.map((factcheck) => (
+              factchecks.map((factcheck: FactCheckResult) => (
                 <Link
                   key={factcheck._id || factcheck.post_id}
                   to={`/posts/${factcheck.post_id}`}

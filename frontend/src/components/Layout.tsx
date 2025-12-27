@@ -1,7 +1,7 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
-  Source, 
+  Database, 
   FileText, 
   CheckCircle2, 
   BarChart3, 
@@ -18,7 +18,7 @@ export default function Layout() {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Források', href: '/sources', icon: Source },
+    { name: 'Források', href: '/sources', icon: Database },
     { name: 'Posztok', href: '/posts', icon: FileText },
     { name: 'Tényellenőrzés', href: '/factchecks', icon: CheckCircle2 },
     { name: 'Statisztikák', href: '/statistics', icon: BarChart3 },

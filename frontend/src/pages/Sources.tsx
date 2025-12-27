@@ -1,22 +1,26 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { sourcesApi, collectionApi } from '../lib/api';
-import { Plus, Play, RefreshCw, Trash2, Edit } from 'lucide-react';
+import { sourcesApi, collectionApi, type Source } from '../lib/api';
+import { Plus, Play, Trash2, Edit } from 'lucide-react';
 import { useState } from 'react';
-import type { Source } from '../lib/api';
 
 export default function Sources() {
   const queryClient = useQueryClient();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSource, setSelectedSource] = useState<Source | null>(null);
 
-  const { data: sources, isLoading } = useQuery({
+  const { data: sources, isLoading } = useQuery<Source[]>({
     queryKey: ['sources'],
-    queryFn: () => sourcesApi.list().then(res => res.data),
+    queryFn: async () => {
+      const res = await sourcesApi.list();
+      return res.data.items || res.data;
+    },
   });
 
   const triggerMutation = useMutation({
-    mutationFn: (sourceId: string) =>
-      collectionApi.trigger(sourceId).then(res => res.data),
+    mutationFn: async (sourceId: string) => {
+      const res = await collectionApi.trigger(sourceId);
+      return res.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sources'] });
       queryClient.invalidateQueries({ queryKey: ['posts'] });
@@ -58,7 +62,7 @@ export default function Sources() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sources && sources.length > 0 ? (
-            sources.map((source) => (
+            sources.map((source: Source) => (
               <div
                 key={source._id}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
