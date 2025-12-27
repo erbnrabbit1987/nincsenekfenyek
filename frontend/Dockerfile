@@ -15,12 +15,15 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit || \
     (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
-# Copy source code
-COPY . .
-
-# Verify that lib/api.ts exists (debug)
-RUN ls -la src/lib/ || echo "src/lib directory not found!" && \
-    cat src/lib/api.ts | head -5 || echo "api.ts not found!"
+# Copy source code (copy src directory first to ensure it's included)
+COPY src ./src
+COPY public ./public 2>/dev/null || true
+COPY index.html ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY tsconfig.node.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
 
 # Build
 RUN npm run build
