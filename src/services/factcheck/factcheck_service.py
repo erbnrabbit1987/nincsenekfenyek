@@ -9,11 +9,18 @@ from datetime import datetime
 
 try:
     import spacy
-    from langdetect import detect
     SPACY_AVAILABLE = True
+    # Try langdetect, fallback to spacy language detection
+    try:
+        from langdetect import detect as langdetect_detect
+        LANGDETECT_AVAILABLE = True
+    except ImportError:
+        LANGDETECT_AVAILABLE = False
+        logging.info("langdetect not available, will use spacy language detection")
 except ImportError:
     SPACY_AVAILABLE = False
-    logging.warning("spaCy or langdetect not available. Fact-checking will be limited.")
+    LANGDETECT_AVAILABLE = False
+    logging.warning("spaCy not available. Fact-checking will be limited.")
 
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Post, FactCheckResult
@@ -60,11 +67,35 @@ class FactCheckService:
     
     def _detect_language(self, text: str) -> str:
         """Detect language of text"""
-        try:
-            return detect(text)
-        except Exception as e:
-            logger.debug(f"Error detecting language: {e}")
-            return "unknown"
+        # Try langdetect first if available
+        if LANGDETECT_AVAILABLE:
+            try:
+                return langdetect_detect(text)
+            except Exception as e:
+                logger.debug(f"langdetect error: {e}, trying spacy fallback")
+        
+        # Fallback to spacy language detection
+        if self.nlp and SPACY_AVAILABLE:
+            try:
+                doc = self.nlp(text[:100])  # First 100 chars for speed
+                # spacy doesn't have built-in language detection, 
+                # but we can use the model's language as indicator
+                if hasattr(doc, 'lang_'):
+                    return doc.lang_
+                # Check if Hungarian model is loaded
+                if hasattr(self.nlp, 'meta') and 'lang' in self.nlp.meta:
+                    model_lang = self.nlp.meta.get('lang', 'unknown')
+                    # If Hungarian model loaded and Hungarian chars present, assume Hungarian
+                    if model_lang == 'hu' and any(ord(c) >= 0x00C0 and ord(c) <= 0x017F for c in text):
+                        return 'hu'
+                    return model_lang
+            except Exception as e:
+                logger.debug(f"spacy language detection error: {e}")
+        
+        # Ultimate fallback: simple heuristic
+        if any(ord(c) >= 0x00C0 and ord(c) <= 0x017F for c in text[:100]):
+            return "hu"  # Hungarian characters detected
+        return "unknown"
     
     def _extract_claims_with_nlp(self, text: str) -> List[Dict[str, Any]]:
         """

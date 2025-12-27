@@ -40,7 +40,8 @@ scrapy==2.11.0
 spacy==3.7.2
 # Hungarian model: python -m spacy download hu_core_news_lg
 nltk==3.8.1
-langdetect==1.0.9
+langdetect==1.0.9  # Note: if build fails, can use spacy language detection instead
+# Alternative: use spacy's language detection or polyglot
 transformers==4.35.2
 sentencepiece==0.1.99
 # torch - Opcionális, CPU-only verzió (kisebb méret, kevesebb probléma)

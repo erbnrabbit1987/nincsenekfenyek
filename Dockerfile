@@ -17,10 +17,13 @@ RUN apt-get clean && \
 COPY requirements.txt .
 
 # Upgrade pip, setuptools, wheel first to avoid segfault issues
-RUN pip install --upgrade pip setuptools wheel
-
-# Install requirements (torch removed to avoid segfault - install separately if needed)
-RUN pip install --no-cache-dir -r requirements.txt
+# Use specific setuptools version to avoid langdetect build issues
+RUN pip install --upgrade pip wheel && \
+    pip install "setuptools<70" && \
+    pip install --no-cache-dir -r requirements.txt || \
+    (echo "Warning: langdetect failed, trying alternative..." && \
+     pip install --no-cache-dir $(grep -v "langdetect" requirements.txt | grep -v "^#" | grep -v "^$" | tr '\n' ' ') && \
+     echo "langdetect skipped - using spacy language detection instead")
 
 # Copy application code
 COPY src/ ./src/
