@@ -15,8 +15,15 @@ COPY package*.json ./
 RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit || \
     (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
-# Copy source code - use COPY . . to ensure all files are included
-COPY . .
+# Copy source code - copy files explicitly to ensure everything is included
+COPY package*.json ./
+COPY src ./src
+COPY index.html ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY tsconfig.node.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.js ./
 
 # Ensure public directory exists (Vite may need it even if empty, but it's optional)
 RUN mkdir -p ./public || true

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { healthApi } from '../lib/api';
+import { healthApi } from '../lib/api.js';
 import { CheckCircle2, AlertCircle, Server, Key } from 'lucide-react';
 
 export default function Settings() {
