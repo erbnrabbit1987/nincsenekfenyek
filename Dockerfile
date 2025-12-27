@@ -10,14 +10,22 @@ ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 # Fix dpkg state if corrupted and install system dependencies
+# Clean apt cache and fix any corruption
 RUN apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get update --fix-missing && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/* && \
+    apt-get update --fix-missing || (rm -rf /var/lib/apt/lists/* && apt-get update) && \
+    apt-get install -y --no-install-recommends --fix-broken && \
     apt-get install -y --no-install-recommends \
     gcc \
     g++ \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+    curl || \
+    (echo "Warning: Retrying package installation..." && \
+     rm -rf /var/lib/apt/lists/* && \
+     apt-get clean && \
+     apt-get update && \
+     apt-get install -y --no-install-recommends --fix-broken && \
+     apt-get install -y --no-install-recommends gcc g++ curl) && \
+    rm -rf /var/lib/apt/lists/* /var/cache/apt/archives/*
 
 # Copy requirements first for better caching
 COPY requirements.txt .
