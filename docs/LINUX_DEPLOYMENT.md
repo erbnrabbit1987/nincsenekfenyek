@@ -91,16 +91,16 @@ sudo chown $USER:$USER /opt/nincsenekfenyek
 cd /opt/nincsenekfenyek
 ```
 
-### 3.2 Development Repository Klónozása
+### 3.2 Repository Klónozása
 
 ```bash
-# Development repository klónozása
-git clone git@github.com:erbnrabbit1987/nincsenekfenyek-devel.git devel
+# Repository klónozása
+git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git nincsenekfenyek
 
 # Vagy ha SSH nem működik, használj HTTPS-t:
-# git clone https://github.com/erbnrabbit1987/nincsenekfenyek-devel.git devel
+# git clone https://github.com/erbnrabbit1987/nincsenekfenyek.git nincsenekfenyek
 
-cd devel
+cd nincsenekfenyek
 ```
 
 ### 3.3 Repository Ellenőrzése
@@ -276,7 +276,7 @@ This message shows that your installation appears to be working correctly.
 
 ```bash
 # A projekt könyvtárban
-cd /opt/nincsenekfenyek/devel
+cd /opt/nincsenekfenyek/nincsenekfenyek
 
 # Docker image-ek build-elése
 docker compose build
@@ -539,7 +539,7 @@ docker compose exec postgres pg_dump -U postgres nincsenekfenyek > /opt/nincsene
 ### 10.3 Update (Frissítés)
 
 ```bash
-cd /opt/nincsenekfenyek/devel
+cd /opt/nincsenekfenyek/nincsenekfenyek
 
 # Változások letöltése
 git pull origin main
@@ -576,8 +576,8 @@ cat ~/.ssh/id_ed25519.pub  # Add hozzá GitHub-hoz
 # 2. Repository klónozása
 sudo mkdir -p /opt/nincsenekfenyek && sudo chown $USER:$USER /opt/nincsenekfenyek
 cd /opt/nincsenekfenyek
-git clone git@github.com:erbnrabbit1987/nincsenekfenyek-devel.git devel
-cd devel
+git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git nincsenekfenyek
+cd nincsenekfenyek
 
 # 3. .env fájl beállítása
 cp .env.example .env
@@ -597,7 +597,7 @@ curl http://localhost:8000/health
 ### Frissítés
 
 ```bash
-cd /opt/nincsenekfenyek/devel
+cd /opt/nincsenekfenyek/nincsenekfenyek
 git pull origin main
 docker compose build
 docker compose down

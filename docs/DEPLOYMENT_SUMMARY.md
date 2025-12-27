@@ -11,7 +11,7 @@
 - ✅ **Lokális repository:** Tiszta, minden változás commitolva
 - ✅ **GitHub repository:** Létezik és elérhető
 - ✅ **Push:** Sikeresen működik
-- ✅ **Remote:** `git@github.com:erbnrabbit1987/nincsenekfenyek-devel.git`
+- ✅ **Remote:** `git@github.com:erbnrabbit1987/nincsenekfenyek.git`
 - ✅ **Branch:** `main` (up-to-date)
 
 **Utolsó commitok:**
@@ -100,8 +100,8 @@ cat ~/.ssh/id_ed25519.pub  # Add hozzá GitHub-hoz: https://github.com/settings/
 # 2. Repository klónozása
 sudo mkdir -p /opt/nincsenekfenyek && sudo chown $USER:$USER /opt/nincsenekfenyek
 cd /opt/nincsenekfenyek
-git clone git@github.com:erbnrabbit1987/nincsenekfenyek-devel.git devel
-cd devel
+git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git nincsenekfenyek
+cd nincsenekfenyek
 
 # 3. .env fájl beállítása
 cp .env.example .env
@@ -149,7 +149,7 @@ Tartalmazza:
 - [ ] Internet kapcsolat
 
 ### Telepítés
-- [ ] Repository klónozva (`/opt/nincsenekfenyek/devel`)
+- [ ] Repository klónozva (`/opt/nincsenekfenyek/nincsenekfenyek`)
 - [ ] .env fájl létrehozva és konfigurálva
 - [ ] SECRET_KEY generálva (64 karakter)
 - [ ] Docker telepítve
@@ -174,7 +174,7 @@ Tartalmazza:
 ### Repository Frissítése
 
 ```bash
-cd /opt/nincsenekfenyek/devel
+cd /opt/nincsenekfenyek/nincsenekfenyek
 
 # Változások letöltése
 git pull origin main
