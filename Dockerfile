@@ -75,7 +75,8 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir beautifulsoup4==4.12.2 || echo "Warning: beautifulsoup4 failed" && \
     pip install --no-cache-dir lxml==4.9.3 || echo "Warning: lxml failed" && \
     pip install --no-cache-dir selenium==4.15.2 || echo "Warning: selenium failed" && \
-    pip install --no-cache-dir scrapy==2.11.0 || echo "Warning: scrapy failed"
+    pip install --no-cache-dir scrapy==2.11.0 || echo "Warning: scrapy failed" && \
+    pip install --no-cache-dir feedparser==6.0.10 || echo "Warning: feedparser failed"
 
 # Install NLP (skip langdetect and heavy transformers dependencies)
 RUN pip install --no-cache-dir \
