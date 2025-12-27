@@ -82,10 +82,16 @@ from src.services.factcheck.factcheck_service import FactCheckService
 import inspect
 
 service = FactCheckService()
-source_code = inspect.getsource(service.check_claim)
 
-uses_google = 'google_search' in source_code.lower() or 'GoogleSearchService' in source_code
-uses_bing = 'bing_search' in source_code.lower() or 'BingSearchService' in source_code
+# Check integration in _search_external_sources method
+try:
+    source_code = inspect.getsource(service._search_external_sources)
+    uses_google = 'google_search' in source_code.lower() or 'GoogleSearchService' in source_code
+    uses_bing = 'bing_search' in source_code.lower() or 'BingSearchService' in source_code
+except Exception as e:
+    print(f"Could not check integration: {e}")
+    uses_google = False
+    uses_bing = False
 
 print("\n" + "=" * 50)
 print("FACT-CHECKING INTEGRÁCIÓ")
@@ -93,23 +99,33 @@ print("=" * 50)
 print(f"\nGoogle Search integráció: {'✓ HASZNÁLVA' if uses_google else '✗ NEM HASZNÁLVA'}")
 print(f"Bing Search integráció: {'✓ HASZNÁLVA' if uses_bing else '✗ NEM HASZNÁLVA'}")
 
-# Tesztelj egy fact-checket
+# Check if services are initialized
+print(f"\nGoogle Search Service inicializálva: {'✓' if hasattr(service, 'google_search') else '✗'}")
+print(f"Bing Search Service inicializálva: {'✓' if hasattr(service, 'bing_search') else '✗'}")
+
+# Test external sources search directly
 if service.google_search.is_configured() or service.bing_search.is_configured():
     print("\n" + "=" * 50)
-    print("FACT-CHECK TESZT")
+    print("EXTERNAL SOURCES SEARCH TESZT")
     print("=" * 50)
     try:
-        result = service.check_claim("Magyarország fővárosa Budapest", include_external=True)
-        external_sources = result.get('external_sources', [])
+        keywords = ["Magyarország", "főváros", "Budapest"]
+        external_sources = service._search_external_sources(
+            claim="Magyarország fővárosa Budapest",
+            keywords=keywords
+        )
         print(f"\nExternal sources található: {len(external_sources)}")
         if external_sources:
             print("✓ External sources integráció működik!")
             for i, source in enumerate(external_sources[:3], 1):
-                print(f"  {i}. {source.get('title', 'N/A')[:60]}...")
+                title = source.get('title', source.get('url', 'N/A'))
+                print(f"  {i}. {title[:60]}...")
         else:
             print("⚠ External sources üres (API kulcsok hiányozhatnak vagy nincs találat)")
     except Exception as e:
-        print(f"✗ Fact-check hiba: {e}")
+        print(f"✗ External sources search hiba: {e}")
+        import traceback
+        traceback.print_exc()
 else:
     print("\n⚠ API kulcsok nincsenek beállítva - external sources nem lesznek használva")
 
