@@ -33,7 +33,9 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -c|--clean)
-            CLEAN=true
+            # Note: Cleanup now happens automatically at the start
+            # This flag is kept for backward compatibility but has no effect
+            log_warn "Note: Container cleanup now happens automatically. This flag has no effect."
             shift
             ;;
         -h|--help)
@@ -167,12 +169,30 @@ check_env_file() {
     fi
 }
 
-cleanup() {
-    if [ "$CLEAN" = true ]; then
-        log_info "Cleaning up existing containers and volumes..."
-        cd "$PROJECT_ROOT"
-        docker-compose down -v
-        log_info "Cleanup completed ✓"
+cleanup_existing_containers() {
+    log_info "Cleaning up existing containers and services..."
+    
+    cd "$PROJECT_ROOT"
+    
+    # Stop and remove all containers, networks (but keep volumes - data is now in ./data/)
+    if docker compose ps -q > /dev/null 2>&1 || docker-compose ps -q > /dev/null 2>&1; then
+        log_info "Stopping existing containers..."
+        # Try docker compose first (newer version), fallback to docker-compose
+        if command -v docker &> /dev/null && docker compose version > /dev/null 2>&1; then
+            docker compose down 2>/dev/null || true
+        else
+            docker-compose down 2>/dev/null || true
+        fi
+        log_info "Existing containers stopped and removed ✓"
+    else
+        log_info "No existing containers found ✓"
+    fi
+    
+    # Remove any orphaned containers with project name (safety check)
+    if docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null | grep -q .; then
+        log_info "Cleaning up orphaned containers..."
+        docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" | xargs -r docker rm -f 2>/dev/null || true
+        log_info "Orphaned containers removed ✓"
     fi
 }
 
@@ -263,9 +283,9 @@ main() {
     echo ""
     
     check_prerequisites
+    cleanup_existing_containers
     check_env_file
     create_directories
-    cleanup
     build_images
     deploy_services
     wait_for_services
