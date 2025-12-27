@@ -3,6 +3,12 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Set environment variables to reduce memory usage
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+
 # Fix dpkg state if corrupted and install system dependencies
 RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
@@ -18,8 +24,10 @@ COPY requirements.txt .
 
 # Upgrade pip, setuptools, wheel first to avoid segfault issues
 # Use setuptools <70 to fix langdetect build issues
-RUN pip install --upgrade pip wheel && \
-    pip install "setuptools<70"
+# Limit pip memory usage
+RUN pip install --upgrade pip wheel setuptools && \
+    pip install "setuptools<70" && \
+    python -c "import sys; print(f'Python version: {sys.version}')"
 
 # Install core dependencies first (small, essential packages)
 # Install one by one to minimize memory usage and avoid segfault
