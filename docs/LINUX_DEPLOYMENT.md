@@ -145,7 +145,7 @@ ENVIRONMENT=production
 
 # API beállítások
 API_HOST=0.0.0.0
-API_PORT=8000
+API_PORT=8095
 
 # MongoDB beállítások
 MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
@@ -184,7 +184,7 @@ ENVIRONMENT=production
 
 # API beállítások
 API_HOST=0.0.0.0
-API_PORT=8000
+API_PORT=8095
 
 # MongoDB beállítások
 MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
@@ -367,7 +367,7 @@ docker compose ps
 **Várt output:**
 ```
 NAME                         STATUS              PORTS
-nincsenekfenyek-backend      Up                  0.0.0.0:8000->8000/tcp
+nincsenekfenyek-backend      Up                  0.0.0.0:8095->8095/tcp
 nincsenekfenyek-mongodb      Up                  0.0.0.0:27017->27017/tcp
 nincsenekfenyek-postgres     Up                  0.0.0.0:5432->5432/tcp
 nincsenekfenyek-redis        Up                  0.0.0.0:6379->6379/tcp
@@ -418,13 +418,13 @@ docker compose logs -f
 
 ```bash
 # Health check
-curl http://localhost:8000/health
+curl http://localhost:8095/health
 
 # API dokumentáció
-curl http://localhost:8000/docs
+curl http://localhost:8095/docs
 
 # Browser-ben:
-# http://your-server-ip:8000/docs
+# http://your-server-ip:8095/docs
 ```
 
 ### 8.3 Adatbázis Kapcsolatok Ellenőrzése
@@ -456,10 +456,10 @@ docker compose logs celery-beat | tail -20
 
 ```bash
 # Sources listázása
-curl http://localhost:8000/api/sources
+curl http://localhost:8095/api/sources
 
 # Collection trigger (ha van source_id)
-curl -X POST http://localhost:8000/api/collection/trigger/{source_id}
+curl -X POST http://localhost:8095/api/collection/trigger/{source_id}
 ```
 
 ---
@@ -483,13 +483,13 @@ docker compose restart backend
 
 ```bash
 # Port használat ellenőrzése
-sudo netstat -tulpn | grep :8000
+sudo netstat -tulpn | grep :8095
 # VAGY
-sudo ss -tulpn | grep :8000
+sudo ss -tulpn | grep :8095
 
 # Ha foglalt, módosítsd a docker-compose.yml port beállítását:
 # ports:
-#   - "8001:8000"  # Másik port használata
+#   - "8096:8095"  # Másik port használata
 ```
 
 ### 9.3 MongoDB Kapcsolat Hiba
@@ -636,7 +636,7 @@ docker compose build
 docker compose up -d
 
 # 6. Ellenőrzés
-curl http://localhost:8000/health
+curl http://localhost:8095/health
 ```
 
 ### Frissítés
@@ -675,7 +675,7 @@ docker compose down
 - **Pre-Deployment Check:** `docs/PRE_DEPLOYMENT_CHECK.md`
 - **Architecture:** `docs/ARCHITECTURE.md`
 - **Development Guide:** `docs/DEVELOPMENT.md`
-- **API Documentation:** http://your-server:8000/docs
+- **API Documentation:** http://your-server:8095/docs
 
 ---
 

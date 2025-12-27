@@ -134,7 +134,7 @@ src/
 - ✅ System dependencies telepítve (gcc, g++, curl)
 - ✅ Requirements telepítése
 - ✅ Application code másolása
-- ✅ Port 8000 exposolva
+- ✅ Port 8095 exposolva
 - ✅ Uvicorn CMD beállítva
 - **Status:** ✅ Kész
 

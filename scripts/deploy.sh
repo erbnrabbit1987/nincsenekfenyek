@@ -378,7 +378,7 @@ wait_for_services() {
     while [ $attempt -lt $max_attempts ]; do
         if docker-compose ps | grep -q "Up"; then
             sleep 2
-            if curl -f http://localhost:8000/health &> /dev/null; then
+            if curl -f http://localhost:8095/health &> /dev/null; then
                 log_info "Backend API is healthy ✓"
                 break
             fi
@@ -402,8 +402,8 @@ show_status() {
     
     echo ""
     log_info "Service URLs:"
-    echo "  - Backend API: http://localhost:8000"
-    echo "  - API Docs: http://localhost:8000/docs"
+    echo "  - Backend API: http://localhost:8095"
+    echo "  - API Docs: http://localhost:8095/docs"
     echo "  - MongoDB: mongodb://localhost:27017"
     echo "  - PostgreSQL: postgresql://postgres:postgres@localhost:5432/nincsenekfenyek"
     echo "  - Redis: redis://localhost:6379"
@@ -424,7 +424,7 @@ main() {
     cleanup_existing_containers
     
     # Check and free up required ports
-    check_and_free_port 8000 "Backend API"
+    check_and_free_port 8095 "Backend API"
     check_and_free_port 27017 "MongoDB" || true  # Don't fail if MongoDB port is busy
     check_and_free_port 5432 "PostgreSQL" || true  # Don't fail if PostgreSQL port is busy
     check_and_free_port 6379 "Redis" || true  # Don't fail if Redis port is busy

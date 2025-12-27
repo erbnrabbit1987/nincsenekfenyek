@@ -14,7 +14,7 @@ echo ""
 echo "=== Service Health ==="
 
 # Check Backend API
-if curl -f http://localhost:8000/health &> /dev/null; then
+if curl -f http://localhost:8095/health &> /dev/null; then
     echo "✓ Backend API: Healthy"
 else
     echo "✗ Backend API: Unhealthy or not responding"
@@ -43,8 +43,8 @@ fi
 
 echo ""
 echo "=== Service URLs ==="
-echo "  Backend API: http://localhost:8000"
-echo "  API Docs: http://localhost:8000/docs"
+echo "  Backend API: http://localhost:8095"
+echo "  API Docs: http://localhost:8095/docs"
 echo "  MongoDB: mongodb://localhost:27017"
 echo "  PostgreSQL: postgresql://postgres:postgres@localhost:5432/nincsenekfenyek"
 echo "  Redis: redis://localhost:6379"
@@ -52,4 +52,5 @@ echo "  Redis: redis://localhost:6379"
 echo ""
 echo "=== Logs (last 10 lines) ==="
 docker-compose logs --tail=10
+
 

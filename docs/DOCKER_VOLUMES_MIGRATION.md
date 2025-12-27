@@ -292,3 +292,4 @@ Ez normális! Az adatok mostantól a `data/` könyvtárban vannak a szerver fáj
 **Utolsó frissítés:** 2024. december 27.  
 **Status:** ✅ Bind mounts konfigurálva
 
+

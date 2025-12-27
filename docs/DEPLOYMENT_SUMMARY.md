@@ -124,7 +124,7 @@ docker compose build
 docker compose up -d
 
 # 6. Ellenőrzés
-curl http://localhost:8000/health
+curl http://localhost:8095/health
 ```
 
 ### 📖 Részletes Útmutató
@@ -162,8 +162,8 @@ Tartalmazza:
 - [ ] Konténerek elindítva
 
 ### Ellenőrzés
-- [ ] Health check sikeres (`curl http://localhost:8000/health`)
-- [ ] API dokumentáció elérhető (`http://server-ip:8000/docs`)
+- [ ] Health check sikeres (`curl http://localhost:8095/health`)
+- [ ] API dokumentáció elérhető (`http://server-ip:8095/docs`)
 - [ ] MongoDB működik
 - [ ] PostgreSQL működik
 - [ ] Redis működik
@@ -263,7 +263,7 @@ docker compose exec redis redis-cli
 
 ## 📊 Szolgáltatások Portok
 
-- **Backend API:** `8000`
+- **Backend API:** `8095`
 - **MongoDB:** `27017`
 - **PostgreSQL:** `5432`
 - **Redis:** `6379`
@@ -286,7 +286,7 @@ docker compose restart backend
 
 ```bash
 # Port használat ellenőrzése
-sudo netstat -tulpn | grep :8000
+sudo netstat -tulpn | grep :8095
 
 # Ha foglalt, módosítsd a docker-compose.yml port beállítását
 ```
@@ -314,8 +314,8 @@ docker compose exec mongodb mongosh --eval "db.adminCommand('ping')"
 - **Development Guide:** `docs/DEVELOPMENT.md`
 
 ### API Dokumentáció
-- **Swagger UI:** http://your-server:8000/docs
-- **ReDoc:** http://your-server:8000/redoc
+- **Swagger UI:** http://your-server:8095/docs
+- **ReDoc:** http://your-server:8095/redoc
 
 ---
 

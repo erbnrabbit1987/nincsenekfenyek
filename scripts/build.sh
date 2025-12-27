@@ -335,13 +335,13 @@ if ask_yes_no "Szeretnéd elindítani a szolgáltatásokat Docker Compose-szal?"
     print_step "Szolgáltatások indítása..."
     docker-compose up -d
     print_success "Szolgáltatások elindítva!"
-    print_info "API dokumentáció: http://localhost:8000/docs"
+    print_info "API dokumentáció: http://localhost:8095/docs"
     print_info "Logok megtekintése: docker-compose logs -f"
 fi
 
 echo ""
 print_info "Következő lépések:"
-echo "  - API tesztelése: http://localhost:8000/docs"
+echo "  - API tesztelése: http://localhost:8095/docs"
 echo "  - Celery worker indítása: celery -A src.celery_app worker --loglevel=info"
 echo "  - Celery beat indítása: celery -A src.celery_app beat --loglevel=info"
 echo ""

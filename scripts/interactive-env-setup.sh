@@ -142,7 +142,7 @@ echo -e "${CYAN}═════════════════════�
 echo ""
 
 ask_with_default "API Host (0.0.0.0 = minden interfész, 127.0.0.1 = csak localhost)" "0.0.0.0" API_HOST
-ask_with_default "API Port" "8000" API_PORT
+ask_with_default "API Port" "8095" API_PORT
 
 # ===========================================
 # Adatbázis Beállítások

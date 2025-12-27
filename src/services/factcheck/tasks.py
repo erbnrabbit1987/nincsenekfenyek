@@ -181,3 +181,4 @@ def factcheck_new_posts_task(source_id: Optional[str] = None) -> Dict[str, Any]:
             'success': False,
             'error': error_msg
         }
+

@@ -51,3 +51,4 @@ docker-compose up -d
 log_info "Services updated and restarted ✓"
 log_info "Check status with: ./scripts/status.sh"
 
+

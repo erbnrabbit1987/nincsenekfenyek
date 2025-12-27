@@ -200,3 +200,4 @@ Ha a deployment továbbra is problémás:
 
 **Jó munkát a folytatáshoz! 🚀**
 
+

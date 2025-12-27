@@ -150,3 +150,4 @@ echo ""
 log_info "Készen vagy! Próbáld meg:"
 echo "  git push -u origin main"
 
+

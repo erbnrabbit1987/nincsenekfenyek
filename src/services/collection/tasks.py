@@ -226,3 +226,4 @@ def get_collection_schedule_for_source(source: Source) -> Optional[Dict[str, Any
         'schedule': total_seconds,
         'args': [str(source._id)]
     }
+

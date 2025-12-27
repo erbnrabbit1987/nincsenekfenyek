@@ -197,3 +197,4 @@ class FactCheckResult:
             checked_by=data.get("checked_by"),
             metadata=data.get("metadata", {}),
         )
+

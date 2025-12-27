@@ -216,3 +216,4 @@ docker run --rm -it nincsenekfenyek python -c "import fastapi; print('OK')"
 **Utolsó frissítés:** 2024. december 26.  
 **Status:** ✅ Segfault megoldások implementálva
 
+

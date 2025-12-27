@@ -319,8 +319,8 @@ bdb58cc test: Test commit-push script functionality
 - [ARCHITECTURE.md](../docs/ARCHITECTURE.md) - Rendszerarchitektúra
 
 ### API Dokumentáció
-- API Swagger: http://localhost:8000/docs (ha fut a backend)
-- ReDoc: http://localhost:8000/redoc
+- API Swagger: http://localhost:8095/docs (ha fut a backend)
+- ReDoc: http://localhost:8095/redoc
 
 ### External APIs
 - [EUROSTAT API](https://ec.europa.eu/eurostat/web/json-and-unicode-web-services)
@@ -350,5 +350,6 @@ bdb58cc test: Test commit-push script functionality
 
 **Utolsó frissítés:** 2024. december 26.  
 **Következő checkpoint:** [Dátum beírása következő session végén]
+
 
 

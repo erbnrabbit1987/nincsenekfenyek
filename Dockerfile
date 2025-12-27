@@ -110,8 +110,8 @@ COPY scripts/ ./scripts/
 RUN mkdir -p logs
 
 # Expose port
-EXPOSE 8000
+EXPOSE 8095
 
 # Run the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8095", "--reload"]
 

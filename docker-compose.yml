@@ -12,7 +12,7 @@ services:
       - ./src:/app/src
       - ./logs:/app/logs
     ports:
-      - "8000:8000"
+      - "8095:8095"
     environment:
       - APP_ENV=development
       - DEBUG=true
