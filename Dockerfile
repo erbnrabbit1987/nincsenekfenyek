@@ -22,21 +22,20 @@ RUN pip install --upgrade pip wheel && \
     pip install "setuptools<70"
 
 # Install core dependencies first (small, essential packages)
-RUN pip install --no-cache-dir \
-    fastapi==0.104.1 \
-    uvicorn[standard]==0.24.0 \
-    python-dotenv==1.0.0 \
-    pydantic==2.5.2 \
-    pydantic-settings==2.1.0
+# Install one by one to minimize memory usage and avoid segfault
+RUN pip install --no-cache-dir fastapi==0.104.1 && \
+    pip install --no-cache-dir "uvicorn[standard]==0.24.0" && \
+    pip install --no-cache-dir python-dotenv==1.0.0 && \
+    pip install --no-cache-dir pydantic==2.5.2 && \
+    pip install --no-cache-dir pydantic-settings==2.1.0
 
-# Install database dependencies
-RUN pip install --no-cache-dir \
-    pymongo==4.6.0 \
-    motor==3.3.2 \
-    sqlalchemy==2.0.23 \
-    alembic==1.12.1 \
-    psycopg2-binary==2.9.9 \
-    mongoengine==0.27.0
+# Install database dependencies (one by one to reduce memory)
+RUN pip install --no-cache-dir pymongo==4.6.0 && \
+    pip install --no-cache-dir motor==3.3.2 && \
+    pip install --no-cache-dir sqlalchemy==2.0.23 && \
+    pip install --no-cache-dir alembic==1.12.1 && \
+    pip install --no-cache-dir psycopg2-binary==2.9.9 && \
+    pip install --no-cache-dir mongoengine==0.27.0
 
 # Install cache & queue
 RUN pip install --no-cache-dir \
@@ -54,12 +53,11 @@ RUN pip install --no-cache-dir \
     passlib[bcrypt]==1.7.4 \
     python-multipart==0.0.6
 
-# Install web scraping (can be heavy)
-RUN pip install --no-cache-dir \
-    beautifulsoup4==4.12.2 \
-    lxml==4.9.3 \
-    selenium==4.15.2 \
-    scrapy==2.11.0 || echo "Warning: Some scraping packages failed"
+# Install web scraping (one by one, can be heavy - skip if segfault)
+RUN pip install --no-cache-dir beautifulsoup4==4.12.2 || echo "Warning: beautifulsoup4 failed" && \
+    pip install --no-cache-dir lxml==4.9.3 || echo "Warning: lxml failed" && \
+    pip install --no-cache-dir selenium==4.15.2 || echo "Warning: selenium failed" && \
+    pip install --no-cache-dir scrapy==2.11.0 || echo "Warning: scrapy failed"
 
 # Install NLP (skip langdetect and heavy transformers dependencies)
 RUN pip install --no-cache-dir \
