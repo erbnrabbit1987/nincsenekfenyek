@@ -174,26 +174,43 @@ cleanup_existing_containers() {
     
     cd "$PROJECT_ROOT"
     
-    # Stop and remove all containers, networks (but keep volumes - data is now in ./data/)
-    if docker compose ps -q > /dev/null 2>&1 || docker-compose ps -q > /dev/null 2>&1; then
-        log_info "Stopping existing containers..."
-        # Try docker compose first (newer version), fallback to docker-compose
-        if command -v docker &> /dev/null && docker compose version > /dev/null 2>&1; then
-            docker compose down 2>/dev/null || true
-        else
-            docker-compose down 2>/dev/null || true
-        fi
-        log_info "Existing containers stopped and removed ✓"
+    # First, force remove any containers with project name (including stuck ones in "Create" state)
+    log_info "Removing containers with project name (force remove)..."
+    local containers=$(docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null || true)
+    if [ -n "$containers" ]; then
+        echo "$containers" | while read -r container; do
+            if [ -n "$container" ]; then
+                log_info "Force removing container: $container"
+                docker rm -f "$container" 2>/dev/null || true
+            fi
+        done
+        log_info "Containers force removed ✓"
     else
-        log_info "No existing containers found ✓"
+        log_info "No containers found to remove ✓"
     fi
     
-    # Remove any orphaned containers with project name (safety check)
-    if docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null | grep -q .; then
-        log_info "Cleaning up orphaned containers..."
-        docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" | xargs -r docker rm -f 2>/dev/null || true
-        log_info "Orphaned containers removed ✓"
+    # Now try docker compose down (with timeout to avoid hanging)
+    log_info "Cleaning up Docker Compose resources..."
+    # Try docker compose first (newer version), fallback to docker-compose
+    if command -v docker &> /dev/null && docker compose version > /dev/null 2>&1; then
+        # Use timeout to prevent hanging (15 seconds max)
+        timeout 15 docker compose down --remove-orphans 2>/dev/null || true
+    else
+        timeout 15 docker-compose down --remove-orphans 2>/dev/null || true
     fi
+    
+    # Final cleanup: remove any remaining containers (force)
+    log_info "Final cleanup: removing any remaining containers..."
+    local remaining=$(docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null || true)
+    if [ -n "$remaining" ]; then
+        echo "$remaining" | while read -r container; do
+            if [ -n "$container" ]; then
+                docker rm -f "$container" 2>/dev/null || true
+            fi
+        done
+    fi
+    
+    log_info "Container cleanup completed ✓"
 }
 
 build_images() {
