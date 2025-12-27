@@ -33,7 +33,9 @@ RUN echo "=== Checking src/lib directory ===" && \
     echo "=== Checking api.ts file ===" && \
     (cat src/lib/api.ts | head -5 || echo "api.ts NOT FOUND") && \
     echo "=== Listing all src files ===" && \
-    find src -name "*.ts" -o -name "*.tsx" | head -20
+    find src -name "*.ts" -o -name "*.tsx" | head -20 && \
+    echo "=== Checking if api.ts is readable ===" && \
+    test -f src/lib/api.ts && echo "api.ts EXISTS" || echo "api.ts DOES NOT EXIST"
 
 # Build
 RUN npm run build
