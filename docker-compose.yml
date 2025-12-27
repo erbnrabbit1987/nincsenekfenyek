@@ -76,6 +76,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nincsenekfenyek-celery-worker
+    user: "1000:1000"
     command: celery -A src.celery_app worker --loglevel=info
     volumes:
       - ./src:/app/src
@@ -85,6 +86,8 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
       - POSTGRESQL_URL=postgresql://postgres:postgres@postgres:5432/nincsenekfenyek
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - mongodb
       - postgres
@@ -107,6 +110,8 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
       - POSTGRESQL_URL=postgresql://postgres:postgres@postgres:5432/nincsenekfenyek
       - REDIS_URL=redis://redis:6379/0
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
       - mongodb
       - postgres

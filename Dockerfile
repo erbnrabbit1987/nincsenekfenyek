@@ -106,8 +106,10 @@ RUN pip install --no-cache-dir black==23.11.0 || echo "Warning: black failed" &&
 COPY src/ ./src/
 COPY scripts/ ./scripts/
 
-# Create logs directory
-RUN mkdir -p logs
+# Create logs directory and non-root user for Celery
+RUN mkdir -p logs && \
+    useradd -m -u 1000 celeryuser && \
+    chown -R celeryuser:celeryuser /app
 
 # Expose port
 EXPOSE 8095
