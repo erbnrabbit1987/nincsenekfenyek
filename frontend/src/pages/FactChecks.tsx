@@ -11,7 +11,7 @@ export default function FactChecks() {
     queryKey: ['factchecks'],
     queryFn: async () => {
       const res = await factcheckApi.listResults({ limit: 50 });
-      return res.data.items || res.data;
+      return (res.data as any).items || res.data;
     },
   });
 

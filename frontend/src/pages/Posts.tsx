@@ -1,14 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
-import { collectionApi } from '../lib/api';
+import { collectionApi, type Post } from '../lib/api';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { hu } from 'date-fns/locale';
 
 export default function Posts() {
-  const { data: posts, isLoading } = useQuery({
+  const { data: posts, isLoading } = useQuery<Post[]>({
     queryKey: ['posts'],
-    queryFn: () => collectionApi.getPosts({ limit: 50 }).then(res => res.data),
+    queryFn: async () => {
+      const res = await collectionApi.getPosts({ limit: 50 });
+      return (res.data as any).items || res.data;
+    },
   });
 
   return (

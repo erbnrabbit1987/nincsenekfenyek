@@ -12,7 +12,7 @@ export default function Sources() {
     queryKey: ['sources'],
     queryFn: async () => {
       const res = await sourcesApi.list();
-      return res.data.items || res.data;
+      return (res.data as any).items || res.data;
     },
   });
 

@@ -7,7 +7,7 @@ export default function Dashboard() {
     queryKey: ['sources'],
     queryFn: async () => {
       const res = await sourcesApi.list();
-      return res.data;
+      return (res.data as any).items || res.data;
     },
   });
 
@@ -15,7 +15,7 @@ export default function Dashboard() {
     queryKey: ['posts', 'recent'],
     queryFn: async () => {
       const res = await collectionApi.getPosts({ limit: 10 });
-      return res.data;
+      return (res.data as any).items || res.data;
     },
   });
 
@@ -23,7 +23,7 @@ export default function Dashboard() {
     queryKey: ['factchecks', 'recent'],
     queryFn: async () => {
       const res = await factcheckApi.listResults({ limit: 10 });
-      return res.data;
+      return (res.data as any).items || res.data;
     },
   });
 
