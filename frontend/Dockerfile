@@ -16,27 +16,20 @@ RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20
     (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
 # Copy source code - copy entire src directory to ensure everything is included
-COPY src ./src
-COPY index.html ./
-COPY vite.config.ts ./
-COPY tsconfig.json ./
-COPY tsconfig.node.json ./
-COPY tailwind.config.js ./
-COPY postcss.config.js ./
+# First, list what's in the build context to debug
+COPY . .
 
 # Ensure public directory exists (Vite may need it even if empty, but it's optional)
 RUN mkdir -p ./public || true
 
-# Debug: Check if lib/api.ts exists before build
+# Debug: Check what files were actually copied
 RUN set -x && \
+    echo "=== Checking src directory ===" && \
+    ls -la src/ && \
     echo "=== Checking src/lib directory ===" && \
-    ls -la src/lib/ && \
-    echo "=== Checking api.ts file ===" && \
-    cat src/lib/api.ts | head -10 && \
+    (ls -la src/lib/ 2>&1 || echo "src/lib NOT FOUND") && \
     echo "=== Listing all TypeScript files ===" && \
-    find src -type f \( -name "*.ts" -o -name "*.tsx" \) && \
-    echo "=== Checking file permissions ===" && \
-    ls -la src/lib/api.ts
+    find src -type f \( -name "*.ts" -o -name "*.tsx" \) 2>&1 | head -30
 
 # Build
 RUN npm run build
