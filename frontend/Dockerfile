@@ -30,9 +30,11 @@ RUN mkdir -p ./public || true
 
 # Debug: Check if lib/api.ts exists before build
 RUN echo "=== Checking src/lib directory ===" && \
-    ls -la src/lib/ 2>/dev/null && \
+    (ls -la src/lib/ || echo "src/lib directory NOT FOUND") && \
     echo "=== Checking api.ts file ===" && \
-    cat src/lib/api.ts | head -5 || echo "api.ts not found"
+    (cat src/lib/api.ts | head -5 || echo "api.ts NOT FOUND") && \
+    echo "=== Listing all src files ===" && \
+    find src -name "*.ts" -o -name "*.tsx" | head -20
 
 # Build
 RUN npm run build
