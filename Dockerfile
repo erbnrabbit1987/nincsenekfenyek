@@ -15,6 +15,11 @@ RUN apt-get clean && \
 
 # Copy requirements first for better caching
 COPY requirements.txt .
+
+# Upgrade pip, setuptools, wheel first to avoid segfault issues
+RUN pip install --upgrade pip setuptools wheel
+
+# Install requirements (torch removed to avoid segfault - install separately if needed)
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code

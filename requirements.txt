@@ -43,7 +43,9 @@ nltk==3.8.1
 langdetect==1.0.9
 transformers==4.35.2
 sentencepiece==0.1.99
-torch==2.1.1  # For transformers (optional, for better performance)
+# torch - Opcionális, CPU-only verzió (kisebb méret, kevesebb probléma)
+# Ha szükséges, telepítsd: pip install torch --index-url https://download.pytorch.org/whl/cpu
+# torch==2.1.1+cpu  # CPU-only verzió, ha kell jobb NLP teljesítmény
 
 # Task Scheduling
 APScheduler==3.10.4
