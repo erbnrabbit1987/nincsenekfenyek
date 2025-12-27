@@ -361,3 +361,103 @@ async def search_magyar_kozlony(
         raise HTTPException(status_code=500, detail=f"Error searching Magyar Közlöny: {str(e)}")
 
 
+# RSS Feed endpoints
+
+@router.post("/rss/collect")
+async def collect_rss_feed(
+    feed_url: str = Query(..., description="RSS feed URL"),
+    max_items: int = Query(50, description="Maximum number of entries to fetch"),
+    feed_name: Optional[str] = Query(None, description="Optional feed name"),
+    background: bool = Query(False, description="Run in background")
+):
+    """Collect entries from RSS/Atom feed"""
+    try:
+        if background:
+            # Run as Celery task
+            task = collect_rss_feed_task.delay(
+                feed_url=feed_url,
+                max_items=max_items,
+                feed_name=feed_name
+            )
+            return {
+                "success": True,
+                "task_id": task.id,
+                "message": f"RSS feed collection task started for: {feed_url}"
+            }
+        else:
+            # Run synchronously
+            rss_service = RSSReaderService()
+            result = rss_service.collect_feed(
+                feed_url=feed_url,
+                max_items=max_items,
+                store=True,
+                feed_name=feed_name
+            )
+            
+            return {
+                "success": True,
+                "feed_url": feed_url,
+                "feed_info": result.get("feed_info", {}),
+                "entries_fetched": result.get("entries_fetched", 0),
+                "entries_stored": result.get("entries_stored", 0)
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error collecting RSS feed: {str(e)}")
+
+
+@router.post("/rss/validate")
+async def validate_rss_feed(
+    feed_url: str = Query(..., description="RSS feed URL to validate")
+):
+    """Validate RSS feed URL"""
+    try:
+        rss_service = RSSReaderService()
+        is_valid = rss_service.validate_feed_url(feed_url)
+        return {
+            "feed_url": feed_url,
+            "valid": is_valid
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error validating RSS feed: {str(e)}")
+
+
+@router.get("/rss/search")
+async def search_rss_entries(
+    query: str = Query(..., description="Search query"),
+    feed_url: Optional[str] = Query(None, description="Feed URL filter"),
+    limit: int = Query(20, description="Maximum results")
+):
+    """Search for RSS feed entries"""
+    try:
+        rss_service = RSSReaderService()
+        entries = rss_service.search_entries(
+            query=query,
+            feed_url=feed_url,
+            limit=limit
+        )
+        return {
+            "query": query,
+            "feed_url": feed_url,
+            "count": len(entries),
+            "entries": entries
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching RSS entries: {str(e)}")
+
+
+@router.get("/rss/feeds")
+async def list_rss_feeds(
+    source_id: Optional[str] = Query(None, description="Optional source ID filter")
+):
+    """List all RSS feeds from stored entries"""
+    try:
+        rss_service = RSSReaderService()
+        feeds = rss_service.list_feeds(source_id=source_id)
+        return {
+            "count": len(feeds),
+            "feeds": feeds
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing RSS feeds: {str(e)}")
+
+
