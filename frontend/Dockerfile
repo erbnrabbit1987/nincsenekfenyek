@@ -3,14 +3,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Increase Node.js memory limit and disable npm update checks
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV npm_config_update_notifier=false
+
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies with retry logic and cache cleaning
-# Clean npm cache and retry on network errors
-RUN npm cache clean --force && \
-    npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 || \
-    (sleep 10 && npm cache clean --force && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000)
+# Install dependencies with increased memory and retry logic
+# Note: Removed npm cache clean --force as it causes segmentation fault in Alpine
+RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit || \
+    (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
 # Copy source code
 COPY . .
