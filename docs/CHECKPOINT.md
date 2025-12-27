@@ -69,3 +69,4 @@
 
 **Status:** ✅ Alapvető funkcionalitás működik, készen áll a következő fejlesztésekhez.
 
+
