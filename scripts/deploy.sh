@@ -253,6 +253,87 @@ cleanup_existing_containers() {
     log_info "Container cleanup completed ✓"
 }
 
+check_and_free_port() {
+    local port=$1
+    local port_name=$2
+    
+    log_info "Checking if port $port ($port_name) is available..."
+    
+    # Check if port is in use
+    local port_in_use=false
+    
+    # Try different methods to check port availability
+    if command -v lsof &> /dev/null; then
+        if lsof -i :$port &> /dev/null; then
+            port_in_use=true
+        fi
+    elif command -v netstat &> /dev/null; then
+        if netstat -tuln 2>/dev/null | grep -q ":$port "; then
+            port_in_use=true
+        fi
+    elif command -v ss &> /dev/null; then
+        if ss -tuln 2>/dev/null | grep -q ":$port "; then
+            port_in_use=true
+        fi
+    else
+        # Fallback: check if Docker container is using the port
+        local container_using_port=$(docker ps --filter "publish=$port" --format "{{.Names}}" 2>/dev/null || true)
+        if [ -n "$container_using_port" ]; then
+            port_in_use=true
+            log_info "  Found container using port: $container_using_port"
+        fi
+    fi
+    
+    if [ "$port_in_use" = true ]; then
+        log_warn "Port $port is already in use!"
+        
+        # Try to find and stop containers using this port
+        log_info "  Searching for containers using port $port..."
+        local containers=$(docker ps --filter "publish=$port" --format "{{.Names}}" 2>/dev/null || true)
+        
+        if [ -z "$containers" ]; then
+            # Try alternative method: check all containers
+            containers=$(docker ps -a --format "{{.Names}}" | while read -r name; do
+                docker port "$name" 2>/dev/null | grep -q ":$port" && echo "$name"
+            done || true)
+        fi
+        
+        if [ -n "$containers" ]; then
+            log_info "  Found containers using port $port:"
+            echo "$containers" | while read -r container; do
+                if [ -n "$container" ]; then
+                    log_info "    - $container"
+                    log_info "    Stopping and removing container..."
+                    timeout 10 docker stop "$container" 2>/dev/null || true
+                    timeout 5 docker rm -f "$container" 2>/dev/null || true
+                    log_info "    ✓ Container removed: $container"
+                fi
+            done
+            
+            # Wait a moment for port to be released
+            sleep 2
+            
+            # Verify port is now free
+            if command -v lsof &> /dev/null; then
+                if ! lsof -i :$port &> /dev/null; then
+                    log_info "  ✓ Port $port is now available"
+                    return 0
+                fi
+            fi
+        fi
+        
+        log_warn "  Port $port may still be in use. Trying to continue anyway..."
+        log_warn "  If deployment fails, manually stop the process using port $port:"
+        log_warn "    - Find process: sudo lsof -i :$port"
+        log_warn "    - Or: sudo netstat -tulpn | grep :$port"
+        log_warn "    - Stop it: sudo kill -9 <PID>"
+        return 1
+    else
+        log_info "  ✓ Port $port is available"
+        return 0
+    fi
+}
+
 build_images() {
     if [ "$BUILD" = true ]; then
         log_info "Building Docker images..."
@@ -341,6 +422,13 @@ main() {
     
     check_prerequisites
     cleanup_existing_containers
+    
+    # Check and free up required ports
+    check_and_free_port 8000 "Backend API"
+    check_and_free_port 27017 "MongoDB" || true  # Don't fail if MongoDB port is busy
+    check_and_free_port 5432 "PostgreSQL" || true  # Don't fail if PostgreSQL port is busy
+    check_and_free_port 6379 "Redis" || true  # Don't fail if Redis port is busy
+    
     check_env_file
     create_directories
     build_images

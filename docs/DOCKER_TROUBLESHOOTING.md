@@ -149,19 +149,65 @@ RUN pip install --upgrade pip setuptools wheel && \
 
 **Hibaüzenet:**
 ```
-Bind for 0.0.0.0:8000 failed: port is already allocated
+Error response from daemon: failed to set up container networking: 
+driver failed programming external connectivity on endpoint nincsenekfenyek-backend: 
+Bind for :::8000 failed: port is already allocated
 ```
 
-**Megoldás:**
+**Automatikus megoldás:**
+A deploy script most automatikusan ellenőrzi és felszabadítja a foglalt portokat:
+```bash
+./scripts/deploy.sh
+```
+
+A script automatikusan:
+1. Ellenőrzi a szükséges portokat (8000, 27017, 5432, 6379)
+2. Megkeresi a portokat használó konténereket
+3. Leállítja és eltávolítja őket
+4. Folytatja a deployment-et
+
+**Manuális megoldás:**
+Ha az automatikus megoldás nem működik:
+
+1. **Port használat ellenőrzése:**
 ```bash
 # Port használat ellenőrzése
+sudo lsof -i :8000
+# vagy
 sudo netstat -tulpn | grep :8000
 # vagy
 sudo ss -tulpn | grep :8000
 
-# Docker Compose port módosítása:
-# ports:
-#   - "8001:8000"  # Másik port használata
+# Docker konténerek port használattal
+docker ps --filter "publish=8000"
+```
+
+2. **Konténer leállítása és törlése:**
+```bash
+# Megtalálni a konténert
+docker ps -a | grep nincsenekfenyek
+
+# Leállítani és törölni
+docker stop <container-name>
+docker rm -f <container-name>
+
+# Vagy minden projekt konténer egyszerre
+docker ps -a --filter "name=nincsenekfenyek" -q | xargs -r docker rm -f
+```
+
+3. **Alternatíva: Port módosítása docker-compose.yml-ban:**
+```yaml
+ports:
+  - "8001:8000"  # Másik port használata host oldalon
+```
+
+4. **Folyamat kilövése (utolsó esetben):**
+```bash
+# Folyamat PID megtalálása
+sudo lsof -ti :8000
+
+# Kilövése
+sudo kill -9 <PID>
 ```
 
 ---
@@ -250,4 +296,5 @@ ENV PATH=/root/.local/bin:$PATH
 ---
 
 **Utolsó frissítés:** 2024. december 26.
+
 
