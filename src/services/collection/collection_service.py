@@ -9,7 +9,7 @@ from datetime import datetime
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source, Post
 from src.services.collection.facebook_scraper import FacebookScraper
-from src.services.collection.news import MTIService, MagyarKozlonyService
+from src.services.collection.news import MTIService, MagyarKozlonyService, RSSReaderService
 
 logger = logging.getLogger(__name__)
 
@@ -249,6 +249,71 @@ class CollectionService:
         
         return result
     
+    def collect_rss_feed(
+        self,
+        source: Source,
+        max_posts: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Collect entries from a general RSS feed
+        
+        Args:
+            source: Source object with RSS feed configuration
+            max_posts: Maximum number of entries to collect (optional)
+            
+        Returns:
+            Dictionary with collection results
+        """
+        logger.info(f"Starting RSS feed collection for source {source._id}")
+        
+        result = {
+            'source_id': str(source._id),
+            'source_type': source.source_type,
+            'posts_found': 0,
+            'posts_saved': 0,
+            'errors': []
+        }
+        
+        try:
+            rss_service = RSSReaderService()
+            
+            # Get feed configuration from source
+            feed_url = source.config.get('feed_url') or source.identifier
+            if not feed_url:
+                raise ValueError("RSS feed URL not specified in source config or identifier")
+            
+            max_items = max_posts or source.config.get('max_items', 50)
+            feed_name = source.config.get('feed_name') or source.name
+            
+            # Validate feed URL
+            if not rss_service.validate_feed_url(feed_url):
+                logger.warning(f"RSS feed URL validation failed: {feed_url}")
+                # Continue anyway, might work
+            
+            # Collect entries
+            collection_result = rss_service.collect_feed(
+                feed_url=feed_url,
+                max_items=max_items,
+                store=True,
+                source_id=str(source._id),
+                feed_name=feed_name
+            )
+            
+            result['posts_found'] = collection_result.get('entries_fetched', 0)
+            result['posts_saved'] = collection_result.get('entries_stored', 0)
+            
+            logger.info(
+                f"RSS feed collection: found {result['posts_found']} entries, "
+                f"saved {result['posts_saved']} new entries for source {source._id}"
+            )
+        
+        except Exception as e:
+            error_msg = f"Error collecting RSS feed: {str(e)}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        return result
+    
     def collect_from_source(
         self,
         source: Source,
@@ -269,8 +334,17 @@ class CollectionService:
             return self.collect_facebook_posts(source, max_posts=max_posts)
         
         elif source.source_type == "news":
-            # MTI RSS feed collection
-            return self.collect_mti_news(source, max_posts=max_posts)
+            # Check if it's a general RSS feed or MTI-specific
+            if source.config.get("feed_url"):
+                # General RSS feed
+                return self.collect_rss_feed(source, max_posts=max_posts)
+            else:
+                # MTI RSS feed collection
+                return self.collect_mti_news(source, max_posts=max_posts)
+        
+        elif source.source_type == "rss":
+            # General RSS feed collection
+            return self.collect_rss_feed(source, max_posts=max_posts)
         
         elif source.source_type == "official_publication":
             # Magyar Közlöny collection

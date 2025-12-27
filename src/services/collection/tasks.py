@@ -13,7 +13,7 @@ from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source
 from src.services.collection.collection_service import CollectionService
 from src.services.collection.statistics import EurostatService, KSHService
-from src.services.collection.news import MTIService, MagyarKozlonyService
+from src.services.collection.news import MTIService, MagyarKozlonyService, RSSReaderService
 
 logger = logging.getLogger(__name__)
 
@@ -460,6 +460,57 @@ def collect_magyar_kozlony_task(
         return {
             'success': False,
             'year': year,
+            'error': error_msg
+        }
+
+
+@shared_task(name="news.collect_rss_feed")
+def collect_rss_feed_task(
+    feed_url: str,
+    max_items: int = 50,
+    source_id: Optional[str] = None,
+    feed_name: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Celery task to collect entries from RSS feed
+    
+    Args:
+        feed_url: RSS feed URL
+        max_items: Maximum number of entries to fetch
+        source_id: Optional source ID for tracking
+        feed_name: Optional feed name
+        
+    Returns:
+        Dictionary with collection result
+    """
+    logger.info(f"Starting RSS feed collection: {feed_url}")
+    
+    try:
+        rss_service = RSSReaderService()
+        
+        # Collect entries
+        result = rss_service.collect_feed(
+            feed_url=feed_url,
+            max_items=max_items,
+            store=True,
+            source_id=source_id,
+            feed_name=feed_name
+        )
+        
+        logger.info(
+            f"RSS feed collection completed: "
+            f"{result['entries_fetched']} fetched, "
+            f"{result['entries_stored']} stored"
+        )
+        
+        return result
+    
+    except Exception as e:
+        error_msg = f"Error collecting RSS feed {feed_url}: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'feed_url': feed_url,
             'error': error_msg
         }
 

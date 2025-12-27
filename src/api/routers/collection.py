@@ -9,9 +9,10 @@ from datetime import datetime
 from src.services.collection.tasks import (
     collect_facebook_posts_task,
     collect_mti_feed_task,
-    collect_magyar_kozlony_task
+    collect_magyar_kozlony_task,
+    collect_rss_feed_task
 )
-from src.services.collection.news import MTIService, MagyarKozlonyService
+from src.services.collection.news import MTIService, MagyarKozlonyService, RSSReaderService
 from src.services.core.source_service import SourceService
 from src.models.database import connect_mongodb_sync
 
