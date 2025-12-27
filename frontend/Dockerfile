@@ -16,7 +16,6 @@ RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20
     (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
 # Copy source code - copy files explicitly to ensure everything is included
-COPY package*.json ./
 COPY src ./src
 COPY index.html ./
 COPY vite.config.ts ./
