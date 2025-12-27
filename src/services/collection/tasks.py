@@ -13,6 +13,7 @@ from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source
 from src.services.collection.collection_service import CollectionService
 from src.services.collection.statistics import EurostatService, KSHService
+from src.services.collection.news import MTIService
 
 logger = logging.getLogger(__name__)
 
@@ -357,6 +358,57 @@ def collect_ksh_dataset_task(
         return {
             'success': False,
             'dataset_code': dataset_code,
+            'error': error_msg
+        }
+
+
+@shared_task(name="news.collect_mti_feed")
+def collect_mti_feed_task(
+    feed_type: str = "all",
+    feed_url: Optional[str] = None,
+    max_items: int = 50,
+    source_id: Optional[str] = None
+) -> Dict[str, Any]:
+    """
+    Celery task to collect articles from MTI RSS feed
+    
+    Args:
+        feed_type: Feed type (all, domestic, international, economy, politics, sports, culture)
+        feed_url: Custom RSS feed URL (overrides feed_type)
+        max_items: Maximum number of articles to fetch
+        source_id: Optional source ID for tracking
+        
+    Returns:
+        Dictionary with collection result
+    """
+    logger.info(f"Starting MTI feed collection: {feed_type}")
+    
+    try:
+        mti_service = MTIService()
+        
+        # Collect articles
+        result = mti_service.collect_articles(
+            feed_type=feed_type,
+            feed_url=feed_url,
+            max_items=max_items,
+            store=True,
+            source_id=source_id
+        )
+        
+        logger.info(
+            f"MTI feed collection completed: "
+            f"{result['articles_fetched']} fetched, "
+            f"{result['articles_stored']} stored"
+        )
+        
+        return result
+    
+    except Exception as e:
+        error_msg = f"Error collecting MTI feed: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'feed_type': feed_type,
             'error': error_msg
         }
 

@@ -35,6 +35,7 @@ beautifulsoup4==4.12.2
 lxml==4.9.3
 selenium==4.15.2
 scrapy==2.11.0
+feedparser==6.0.10  # RSS/Atom feed parsing
 
 # NLP & Text Processing
 spacy==3.7.2

@@ -6,7 +6,8 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
-from src.services.collection.tasks import collect_facebook_posts_task
+from src.services.collection.tasks import collect_facebook_posts_task, collect_mti_feed_task
+from src.services.collection.news import MTIService
 from src.services.core.source_service import SourceService
 from src.models.database import connect_mongodb_sync
 
@@ -207,5 +208,84 @@ async def get_post(post_id: str):
             status_code=500,
             detail=f"Error getting post: {str(e)}"
         )
+
+
+# MTI News Collection endpoints
+
+@router.post("/mti/collect")
+async def collect_mti_news(
+    feed_type: str = Query("all", description="Feed type: all, domestic, international, economy, politics, sports, culture"),
+    feed_url: Optional[str] = Query(None, description="Custom RSS feed URL (overrides feed_type)"),
+    max_items: int = Query(50, description="Maximum number of articles to fetch"),
+    background: bool = Query(False, description="Run in background")
+):
+    """Collect articles from MTI RSS feed"""
+    try:
+        if background:
+            # Run as Celery task
+            task = collect_mti_feed_task.delay(
+                feed_type=feed_type,
+                feed_url=feed_url,
+                max_items=max_items
+            )
+            return {
+                "success": True,
+                "task_id": task.id,
+                "message": f"MTI collection task started for feed: {feed_type}"
+            }
+        else:
+            # Run synchronously
+            mti_service = MTIService()
+            result = mti_service.collect_articles(
+                feed_type=feed_type,
+                feed_url=feed_url,
+                max_items=max_items,
+                store=True
+            )
+            
+            return {
+                "success": True,
+                "feed_type": feed_type,
+                "articles_fetched": result.get("articles_fetched", 0),
+                "articles_stored": result.get("articles_stored", 0)
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error collecting MTI news: {str(e)}")
+
+
+@router.get("/mti/feeds")
+async def list_mti_feeds():
+    """List available MTI RSS feeds"""
+    try:
+        mti_service = MTIService()
+        feeds = mti_service.get_available_feeds()
+        return {
+            "feeds": feeds
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing MTI feeds: {str(e)}")
+
+
+@router.get("/mti/search")
+async def search_mti_articles(
+    query: str = Query(..., description="Search query"),
+    category: Optional[str] = Query(None, description="Category filter"),
+    limit: int = Query(20, description="Maximum results")
+):
+    """Search for MTI articles"""
+    try:
+        mti_service = MTIService()
+        articles = mti_service.search_articles(
+            query=query,
+            category=category,
+            limit=limit
+        )
+        return {
+            "query": query,
+            "count": len(articles),
+            "articles": articles
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching MTI articles: {str(e)}")
 
 

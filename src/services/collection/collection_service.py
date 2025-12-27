@@ -9,6 +9,7 @@ from datetime import datetime
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source, Post
 from src.services.collection.facebook_scraper import FacebookScraper
+from src.services.collection.news import MTIService
 
 logger = logging.getLogger(__name__)
 
@@ -134,6 +135,63 @@ class CollectionService:
         
         return result
     
+    def collect_mti_news(
+        self,
+        source: Source,
+        max_posts: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Collect news articles from MTI RSS feed
+        
+        Args:
+            source: Source object with MTI feed configuration
+            max_posts: Maximum number of articles to collect (optional)
+            
+        Returns:
+            Dictionary with collection results
+        """
+        logger.info(f"Starting MTI collection for source {source._id}")
+        
+        result = {
+            'source_id': str(source._id),
+            'source_type': source.source_type,
+            'posts_found': 0,
+            'posts_saved': 0,
+            'errors': []
+        }
+        
+        try:
+            mti_service = MTIService()
+            
+            # Get feed configuration from source
+            feed_type = source.config.get('feed_type', 'all')
+            feed_url = source.config.get('feed_url')
+            max_items = max_posts or source.config.get('max_items', 50)
+            
+            # Collect articles
+            collection_result = mti_service.collect_articles(
+                feed_type=feed_type,
+                feed_url=feed_url,
+                max_items=max_items,
+                store=True,
+                source_id=str(source._id)
+            )
+            
+            result['posts_found'] = collection_result.get('articles_fetched', 0)
+            result['posts_saved'] = collection_result.get('articles_stored', 0)
+            
+            logger.info(
+                f"MTI collection: found {result['posts_found']} articles, "
+                f"saved {result['posts_saved']} new articles for source {source._id}"
+            )
+        
+        except Exception as e:
+            error_msg = f"Error collecting MTI news: {str(e)}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        return result
+    
     def collect_from_source(
         self,
         source: Source,
@@ -154,15 +212,8 @@ class CollectionService:
             return self.collect_facebook_posts(source, max_posts=max_posts)
         
         elif source.source_type == "news":
-            # RSS feed collection - to be implemented
-            logger.warning("RSS feed collection not yet implemented")
-            return {
-                'source_id': str(source._id),
-                'source_type': source.source_type,
-                'posts_found': 0,
-                'posts_saved': 0,
-                'errors': ['RSS feed collection not yet implemented']
-            }
+            # MTI RSS feed collection
+            return self.collect_mti_news(source, max_posts=max_posts)
         
         elif source.source_type == "statistics":
             # Statistics collection - to be implemented
