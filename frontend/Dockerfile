@@ -27,20 +27,16 @@ COPY postcss.config.js ./
 # Ensure public directory exists (Vite may need it even if empty, but it's optional)
 RUN mkdir -p ./public || true
 
-# Debug: Check if lib/api.ts exists before build (using timestamp to avoid cache)
-RUN echo "=== DEBUG $(date) ===" && \
+# Debug: Check if lib/api.ts exists before build
+RUN set -x && \
     echo "=== Checking src/lib directory ===" && \
-    (ls -la src/lib/ || echo "src/lib directory NOT FOUND") && \
+    ls -la src/lib/ && \
     echo "=== Checking api.ts file ===" && \
-    (cat src/lib/api.ts | head -5 || echo "api.ts NOT FOUND") && \
-    echo "=== Listing all src files ===" && \
-    find src -name "*.ts" -o -name "*.tsx" | head -20 && \
-    echo "=== Checking if api.ts is readable ===" && \
-    test -f src/lib/api.ts && echo "api.ts EXISTS" || echo "api.ts DOES NOT EXIST" && \
-    echo "=== Current working directory ===" && \
-    pwd && \
-    echo "=== Full path check ===" && \
-    ls -la /app/src/lib/api.ts 2>&1 || echo "Full path also not found"
+    cat src/lib/api.ts | head -10 && \
+    echo "=== Listing all TypeScript files ===" && \
+    find src -type f \( -name "*.ts" -o -name "*.tsx" \) && \
+    echo "=== Checking file permissions ===" && \
+    ls -la src/lib/api.ts
 
 # Build
 RUN npm run build
