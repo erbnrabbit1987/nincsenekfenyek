@@ -25,6 +25,7 @@ except ImportError:
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Post, FactCheckResult
 from src.services.search import GoogleSearchService, BingSearchService
+from src.services.collection.statistics import EurostatService
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,8 @@ class FactCheckService:
         # Initialize search services
         self.google_search = GoogleSearchService()
         self.bing_search = BingSearchService()
+        # Initialize statistics service
+        self.eurostat_service = EurostatService()
     
     def _load_nlp_model(self):
         """Load Hungarian NLP model"""
@@ -263,7 +266,30 @@ class FactCheckService:
             except Exception as e:
                 logger.error(f"Error searching with Bing: {e}")
         
-        # TODO: Implement EUROSTAT API integration
+        # Search EUROSTAT statistics for relevant data
+        try:
+            # Search for relevant datasets
+            eurostat_datasets = self.eurostat_service.search_for_statistics(
+                keywords=keywords,
+                max_results=3
+            )
+            
+            for dataset in eurostat_datasets:
+                # Get stored data if available
+                stored_data = self.eurostat_service.get_stored_dataset(dataset["code"])
+                if stored_data:
+                    references.append({
+                        "type": "statistics",
+                        "source": "eurostat",
+                        "dataset_code": dataset["code"],
+                        "title": dataset.get("label", dataset["code"]),
+                        "url": f"https://ec.europa.eu/eurostat/web/main/data/database?node_code={dataset['code']}",
+                        "relevance_score": 0.7,
+                        "last_updated": stored_data.get("updated_at", "").isoformat() if stored_data.get("updated_at") else ""
+                    })
+        except Exception as e:
+            logger.error(f"Error searching EUROSTAT statistics: {e}")
+        
         # TODO: Implement fact-checking websites search
         
         return references

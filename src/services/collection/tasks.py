@@ -12,6 +12,7 @@ from bson import ObjectId
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source
 from src.services.collection.collection_service import CollectionService
+from src.services.collection.statistics import EurostatService
 
 logger = logging.getLogger(__name__)
 
@@ -149,6 +150,148 @@ def collect_all_active_sources_task() -> Dict[str, Any]:
         
     except Exception as e:
         error_msg = f"Error in collect_all_active_sources_task: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'error': error_msg
+        }
+
+
+@shared_task(name="statistics.collect_eurostat_dataset")
+def collect_eurostat_dataset_task(
+    dataset_code: str,
+    filters: Optional[Dict[str, List[str]]] = None,
+    last_n_periods: int = 10,
+    store: bool = True
+) -> Dict[str, Any]:
+    """
+    Celery task to collect EUROSTAT dataset
+    
+    Args:
+        dataset_code: EUROSTAT dataset code (e.g., 'tps00001')
+        filters: Optional dimension filters
+        last_n_periods: Number of latest time periods to fetch
+        store: Whether to store in MongoDB
+        
+    Returns:
+        Dictionary with collection result
+    """
+    logger.info(f"Starting EUROSTAT dataset collection: {dataset_code}")
+    
+    try:
+        eurostat_service = EurostatService()
+        
+        # Collect dataset
+        dataset_data = eurostat_service.collect_dataset(
+            dataset_code=dataset_code,
+            filters=filters,
+            last_n_periods=last_n_periods,
+            store=store
+        )
+        
+        if dataset_data:
+            logger.info(f"EUROSTAT dataset {dataset_code} collected successfully")
+            return {
+                'success': True,
+                'dataset_code': dataset_code,
+                'data_points': len(dataset_data.get('value', [])) if isinstance(dataset_data, dict) else 0,
+                'stored': store
+            }
+        else:
+            logger.warning(f"EUROSTAT dataset {dataset_code} collection failed")
+            return {
+                'success': False,
+                'dataset_code': dataset_code,
+                'error': 'Failed to retrieve dataset data'
+            }
+    
+    except Exception as e:
+        error_msg = f"Error collecting EUROSTAT dataset {dataset_code}: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'dataset_code': dataset_code,
+            'error': error_msg
+        }
+
+
+@shared_task(name="statistics.update_eurostat_datasets")
+def update_eurostat_datasets_task(
+    dataset_codes: Optional[List[str]] = None,
+    last_n_periods: int = 10
+) -> Dict[str, Any]:
+    """
+    Celery task to update multiple EUROSTAT datasets
+    
+    Args:
+        dataset_codes: List of dataset codes to update (None = update all tracked)
+        last_n_periods: Number of latest time periods to fetch
+        
+    Returns:
+        Dictionary with update results
+    """
+    logger.info("Starting EUROSTAT datasets update task")
+    
+    try:
+        db = connect_mongodb_sync()
+        eurostat_service = EurostatService()
+        
+        # Get dataset codes to update
+        if dataset_codes is None:
+            # Get all tracked datasets from MongoDB
+            tracked = db.statistics.find(
+                {"source": "eurostat"},
+                {"dataset_code": 1}
+            )
+            dataset_codes = [doc["dataset_code"] for doc in tracked]
+        
+        results = {
+            'total_datasets': len(dataset_codes),
+            'successful': 0,
+            'failed': 0,
+            'dataset_results': []
+        }
+        
+        for dataset_code in dataset_codes:
+            try:
+                dataset_data = eurostat_service.collect_dataset(
+                    dataset_code=dataset_code,
+                    last_n_periods=last_n_periods,
+                    store=True
+                )
+                
+                if dataset_data:
+                    results['successful'] += 1
+                    results['dataset_results'].append({
+                        'dataset_code': dataset_code,
+                        'success': True
+                    })
+                else:
+                    results['failed'] += 1
+                    results['dataset_results'].append({
+                        'dataset_code': dataset_code,
+                        'success': False,
+                        'error': 'Failed to retrieve data'
+                    })
+            
+            except Exception as e:
+                logger.error(f"Error updating dataset {dataset_code}: {e}")
+                results['failed'] += 1
+                results['dataset_results'].append({
+                    'dataset_code': dataset_code,
+                    'success': False,
+                    'error': str(e)
+                })
+        
+        logger.info(
+            f"EUROSTAT update task completed: "
+            f"{results['successful']}/{results['total_datasets']} successful"
+        )
+        
+        return results
+    
+    except Exception as e:
+        error_msg = f"Error in update_eurostat_datasets_task: {str(e)}"
         logger.error(error_msg, exc_info=True)
         return {
             'success': False,

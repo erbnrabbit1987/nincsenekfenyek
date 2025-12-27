@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 
 from src.config.settings import get_settings
 from src.models.database import connect_mongodb, disconnect_mongodb
-from src.api.routers import sources, collection, factcheck
+from src.api.routers import sources, collection, factcheck, statistics
 
 settings = get_settings()
 
@@ -44,6 +44,7 @@ app.add_middleware(
 app.include_router(sources.router)
 app.include_router(collection.router)
 app.include_router(factcheck.router)
+app.include_router(statistics.router)
 
 
 @app.get("/")

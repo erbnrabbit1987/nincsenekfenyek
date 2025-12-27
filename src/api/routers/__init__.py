@@ -1,7 +1,7 @@
 """
 API Routers
 """
-from . import sources, collection, factcheck
+from . import sources, collection, factcheck, statistics
 
-__all__ = ["sources", "collection", "factcheck"]
+__all__ = ["sources", "collection", "factcheck", "statistics"]
 
