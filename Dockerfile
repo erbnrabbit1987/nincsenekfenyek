@@ -22,9 +22,11 @@ RUN pip install --upgrade pip wheel && \
     pip install "setuptools<70"
 
 # Install requirements (langdetect may fail, but code has fallback)
+# Create filtered requirements file without langdetect if initial install fails
 RUN pip install --no-cache-dir -r requirements.txt || \
     (echo "Warning: Some packages failed (likely langdetect), continuing without them..." && \
-     pip install --no-cache-dir $(grep -v "langdetect" requirements.txt | grep -v "^#" | grep -v "^$" | tr '\n' ' ') && \
+     grep -v "langdetect" requirements.txt | grep -v "^#" | grep -v "^$" | sed '/^$/d' > /tmp/requirements_filtered.txt && \
+     pip install --no-cache-dir -r /tmp/requirements_filtered.txt && \
      echo "langdetect installation skipped - using spacy fallback")
 
 # Copy application code
