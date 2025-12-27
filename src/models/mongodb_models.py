@@ -46,7 +46,7 @@ class SourceGroup:
 
 class Source:
     """Source Model"""
-    SOURCE_TYPES = ["facebook", "news", "statistics"]
+    SOURCE_TYPES = ["facebook", "news", "statistics", "official_publication"]
     
     def __init__(
         self,
