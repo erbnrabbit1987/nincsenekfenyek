@@ -340,6 +340,12 @@ build_images() {
         cd "$PROJECT_ROOT"
         docker-compose build --no-cache
         log_info "Build completed ✓"
+    else
+        # Always build frontend even without --build flag, as it needs npm install
+        log_info "Building frontend Docker image (always required)..."
+        cd "$PROJECT_ROOT"
+        docker-compose build frontend
+        log_info "Frontend build completed ✓"
     fi
 }
 
@@ -374,12 +380,27 @@ wait_for_services() {
     
     max_attempts=30
     attempt=0
+    backend_ready=false
+    frontend_ready=false
     
     while [ $attempt -lt $max_attempts ]; do
         if docker-compose ps | grep -q "Up"; then
             sleep 2
-            if curl -f http://localhost:8095/health &> /dev/null; then
+            
+            # Check backend
+            if [ "$backend_ready" = false ] && curl -f http://localhost:8095/health &> /dev/null; then
                 log_info "Backend API is healthy ✓"
+                backend_ready=true
+            fi
+            
+            # Check frontend
+            if [ "$frontend_ready" = false ] && curl -f http://localhost:8075 &> /dev/null; then
+                log_info "Frontend is healthy ✓"
+                frontend_ready=true
+            fi
+            
+            # If both are ready, we can exit
+            if [ "$backend_ready" = true ] && [ "$frontend_ready" = true ]; then
                 break
             fi
         fi
@@ -389,8 +410,14 @@ wait_for_services() {
     done
     echo ""
     
+    if [ "$backend_ready" = false ]; then
+        log_warn "Backend API is taking longer than expected to start."
+    fi
+    if [ "$frontend_ready" = false ]; then
+        log_warn "Frontend is taking longer than expected to start."
+    fi
     if [ $attempt -eq $max_attempts ]; then
-        log_warn "Services are taking longer than expected to start."
+        log_warn "Some services are taking longer than expected to start."
         log_warn "Check logs with: docker-compose logs -f"
     fi
 }
@@ -402,6 +429,7 @@ show_status() {
     
     echo ""
     log_info "Service URLs:"
+    echo "  - Frontend: http://localhost:8075"
     echo "  - Backend API: http://localhost:8095"
     echo "  - API Docs: http://localhost:8095/docs"
     echo "  - MongoDB: mongodb://localhost:27017"
@@ -425,6 +453,7 @@ main() {
     
     # Check and free up required ports
     check_and_free_port 8095 "Backend API"
+    check_and_free_port 8075 "Frontend" || true  # Don't fail if Frontend port is busy
     check_and_free_port 27017 "MongoDB" || true  # Don't fail if MongoDB port is busy
     check_and_free_port 5432 "PostgreSQL" || true  # Don't fail if PostgreSQL port is busy
     check_and_free_port 6379 "Redis" || true  # Don't fail if Redis port is busy
