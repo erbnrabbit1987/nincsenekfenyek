@@ -63,8 +63,8 @@ flake8==6.1.0
 mypy==1.7.1
 isort==5.12.0
 
-# CORS
-python-cors==1.0.0
+# CORS (FastAPI has built-in CORS support via CORSMiddleware)
+# python-cors removed - FastAPI includes CORS middleware
 
 # Date/Time
 python-dateutil==2.8.2
