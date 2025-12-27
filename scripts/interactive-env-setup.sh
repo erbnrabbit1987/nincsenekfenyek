@@ -104,7 +104,8 @@ echo "Környezet típus:"
 echo "  1) development (fejlesztés)"
 echo "  2) production (éles)"
 echo "  3) staging (tesztelés)"
-read -p "$(echo -e ${CYAN}Válassz környezetet [1-3] (1): ${NC})" env_choice
+env_prompt=$(echo -e "${CYAN}Válassz környezetet [1-3] (1): ${NC}")
+read -p "$env_prompt" env_choice
 env_choice="${env_choice:-1}"
 
 case $env_choice in
@@ -190,7 +191,8 @@ if ask_yes_no "Szeretnél egy erős jelszót generálni a PostgreSQL-hez?" "y"; 
     POSTGRES_PASSWORD=$(generate_secret_key | head -c 32)
     echo -e "${GREEN}✓${NC} PostgreSQL jelszó generálva"
 else
-    read -sp "$(echo -e ${CYAN}PostgreSQL Jelszó: ${NC})" POSTGRES_PASSWORD
+    postgres_pw_prompt=$(echo -e "${CYAN}PostgreSQL Jelszó: ${NC}")
+    read -sp "$postgres_pw_prompt" POSTGRES_PASSWORD
     echo ""
 fi
 
@@ -233,7 +235,8 @@ echo "  1) DEBUG (részletes)"
 echo "  2) INFO (alapértelmezett)"
 echo "  3) WARNING (csak figyelmeztetések)"
 echo "  4) ERROR (csak hibák)"
-read -p "$(echo -e ${CYAN}Válassz log szintet [1-4] (2): ${NC})" log_choice
+log_prompt=$(echo -e "${CYAN}Válassz log szintet [1-4] (2): ${NC}")
+read -p "$log_prompt" log_choice
 log_choice="${log_choice:-2}"
 
 case $log_choice in
