@@ -8,6 +8,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nincsenekfenyek-backend
+    env_file:
+      - .env
     volumes:
       - ./src:/app/src
       - ./logs:/app/logs
@@ -76,6 +78,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nincsenekfenyek-celery-worker
+    env_file:
+      - .env
     user: "1000:1000"
     command: celery -A src.celery_app worker --loglevel=info
     volumes:
@@ -101,6 +105,8 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: nincsenekfenyek-celery-beat
+    env_file:
+      - .env
     command: celery -A src.celery_app beat --loglevel=info
     volumes:
       - ./src:/app/src
