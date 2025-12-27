@@ -1,7 +1,7 @@
 """
 Collection API Routes
 """
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Query, BackgroundTasks
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
