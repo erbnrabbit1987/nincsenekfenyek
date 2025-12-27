@@ -174,40 +174,80 @@ cleanup_existing_containers() {
     
     cd "$PROJECT_ROOT"
     
-    # First, force remove any containers with project name (including stuck ones in "Create" state)
-    log_info "Removing containers with project name (force remove)..."
+    # First, try to stop containers gracefully, then force remove
+    log_info "Listing all containers with project name..."
     local containers=$(docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null || true)
+    
     if [ -n "$containers" ]; then
+        log_info "Found containers:"
         echo "$containers" | while read -r container; do
             if [ -n "$container" ]; then
-                log_info "Force removing container: $container"
-                docker rm -f "$container" 2>/dev/null || true
+                echo "  - $container ($(docker ps -a --filter "name=^${container}$" --format '{{.Status}}' 2>/dev/null || echo 'unknown status'))"
             fi
         done
-        log_info "Containers force removed ✓"
+        
+        log_info "Step 1: Stopping containers gracefully..."
+        echo "$containers" | while read -r container; do
+            if [ -n "$container" ]; then
+                log_info "  Stopping: $container"
+                timeout 5 docker stop "$container" 2>&1 | head -5 || log_warn "  Failed to stop $container (will force remove)"
+            fi
+        done
+        
+        log_info "Step 2: Force removing containers (with timeout)..."
+        echo "$containers" | while read -r container; do
+            if [ -n "$container" ]; then
+                log_info "  Force removing: $container"
+                # Use timeout to prevent hanging (10 seconds max per container)
+                if timeout 10 docker rm -f "$container" 2>&1; then
+                    log_info "  ✓ Removed: $container"
+                else
+                    log_warn "  ✗ Failed to remove: $container (may be stuck, trying kill signal)"
+                    # Try sending kill signal directly
+                    docker kill "$container" 2>/dev/null || true
+                    sleep 1
+                    timeout 5 docker rm -f "$container" 2>/dev/null || log_error "  ✗✗ Could not remove: $container"
+                fi
+            fi
+        done
+        log_info "Container removal process completed ✓"
     else
         log_info "No containers found to remove ✓"
     fi
     
     # Now try docker compose down (with timeout to avoid hanging)
-    log_info "Cleaning up Docker Compose resources..."
+    log_info "Step 3: Cleaning up Docker Compose resources..."
     # Try docker compose first (newer version), fallback to docker-compose
     if command -v docker &> /dev/null && docker compose version > /dev/null 2>&1; then
-        # Use timeout to prevent hanging (15 seconds max)
-        timeout 15 docker compose down --remove-orphans 2>/dev/null || true
+        log_info "  Using 'docker compose down --remove-orphans' (timeout: 15s)..."
+        if timeout 15 docker compose down --remove-orphans 2>&1; then
+            log_info "  ✓ Docker Compose cleanup successful"
+        else
+            log_warn "  ✗ Docker Compose cleanup timed out or failed (continuing anyway)"
+        fi
     else
-        timeout 15 docker-compose down --remove-orphans 2>/dev/null || true
+        log_info "  Using 'docker-compose down --remove-orphans' (timeout: 15s)..."
+        if timeout 15 docker-compose down --remove-orphans 2>&1; then
+            log_info "  ✓ Docker Compose cleanup successful"
+        else
+            log_warn "  ✗ Docker Compose cleanup timed out or failed (continuing anyway)"
+        fi
     fi
     
-    # Final cleanup: remove any remaining containers (force)
-    log_info "Final cleanup: removing any remaining containers..."
+    # Final cleanup: remove any remaining containers (force with timeout)
+    log_info "Step 4: Final cleanup - checking for remaining containers..."
     local remaining=$(docker ps -a --filter "name=nincsenekfenyek" --format "{{.Names}}" 2>/dev/null || true)
     if [ -n "$remaining" ]; then
+        log_warn "  Found remaining containers:"
         echo "$remaining" | while read -r container; do
             if [ -n "$container" ]; then
-                docker rm -f "$container" 2>/dev/null || true
+                log_warn "    - $container"
+                log_info "    Attempting final force remove (timeout: 5s)..."
+                timeout 5 docker rm -f "$container" 2>&1 || log_error "    ✗ Could not remove: $container (may need manual removal)"
             fi
         done
+    else
+        log_info "  ✓ No remaining containers found"
     fi
     
     log_info "Container cleanup completed ✓"
