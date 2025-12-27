@@ -32,8 +32,11 @@ class Settings(BaseSettings):
     # CORS
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
-        "http://localhost:5173",  # Vite default port
+        "http://localhost:5173",  # Vite default port (development)
+        "http://localhost:8075",  # Frontend production port
         "http://localhost:8095",
+        "https://nincsenekfenyek.e9gaming.hu",
+        "http://nincsenekfenyek.e9gaming.hu",
     ]
     
     # Logging
