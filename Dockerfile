@@ -108,8 +108,9 @@ COPY scripts/ ./scripts/
 
 # Create logs directory and non-root user for Celery
 RUN mkdir -p logs && \
-    useradd -m -u 1000 celeryuser && \
-    chown -R celeryuser:celeryuser /app
+    groupadd -r -g 1000 celeryuser && \
+    useradd -r -u 1000 -g celeryuser celeryuser && \
+    chown -R celeryuser:celeryuser /app /app/logs
 
 # Expose port
 EXPOSE 8095
