@@ -129,8 +129,42 @@ Your branch is up to date with 'origin/main'.
 ### 4.1 .env Fájl Létrehozása
 
 ```bash
-# .env.example másolása .env-re
-cp .env.example .env
+# .env.example fájl ellenőrzése
+if [ -f ".env.example" ]; then
+    # .env.example másolása .env-re
+    cp .env.example .env
+    echo "✓ .env fájl létrehozva .env.example alapján"
+else
+    # Ha nincs .env.example, hozd létre manuálisan
+    echo "⚠️ .env.example nem található, létrehozom..."
+    cat > .env << 'EOF'
+# Alkalmazás beállítások
+SECRET_KEY=change-me-generate-strong-key-here
+DEBUG=False
+ENVIRONMENT=production
+
+# API beállítások
+API_HOST=0.0.0.0
+API_PORT=8000
+
+# MongoDB beállítások
+MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
+
+# PostgreSQL beállítások
+POSTGRES_DB=nincsenekfenyek
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=erős-jelszó-itt
+POSTGRESQL_URL=postgresql://postgres:erős-jelszó-itt@postgres:5432/nincsenekfenyek
+
+# Redis beállítások
+REDIS_URL=redis://redis:6379/0
+
+# Celery beállítások
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
+EOF
+    echo "✓ .env fájl létrehozva"
+fi
 
 # .env fájl szerkesztése
 nano .env

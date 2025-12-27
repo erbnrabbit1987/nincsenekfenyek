@@ -104,7 +104,11 @@ git clone git@github.com:erbnrabbit1987/nincsenekfenyek.git nincsenekfenyek
 cd nincsenekfenyek
 
 # 3. .env fájl beállítása
-cp .env.example .env
+if [ -f ".env.example" ]; then
+    cp .env.example .env
+else
+    echo "⚠️ .env.example nem található, hozd létre manuálisan a .env fájlt"
+fi
 nano .env  # SECRET_KEY generálása: openssl rand -hex 32
 
 # 4. Docker telepítése (Ubuntu/Debian)
