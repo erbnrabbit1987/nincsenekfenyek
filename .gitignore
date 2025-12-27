@@ -155,3 +155,7 @@ docker-compose.override.yml
 
 # Frontend (ha lesz) - ENGEDÉLYEZVE
 # frontend/
+
+# Data directory (persistent database storage)
+data/
+!data/.gitkeep
