@@ -1,0 +1,16 @@
+# Development dependencies
+-r requirements.txt
+
+# Development Tools
+ipython==8.18.1
+ipdb==0.13.13
+black==23.11.0
+flake8==6.1.0
+mypy==1.7.1
+isort==5.12.0
+pre-commit==3.5.0
+
+# Documentation
+mkdocs==1.5.3
+mkdocs-material==9.4.14
+

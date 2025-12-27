@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  # Backend API
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nincsenekfenyek-backend
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_ENV=development
+      - DEBUG=true
+      - MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
+      - POSTGRESQL_URL=postgresql://postgres:postgres@postgres:5432/nincsenekfenyek
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+    networks:
+      - nincsenekfenyek-network
+
+  # MongoDB Database
+  mongodb:
+    image: mongo:6.0
+    container_name: nincsenekfenyek-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+    environment:
+      - MONGO_INITDB_DATABASE=nincsenekfenyek
+    networks:
+      - nincsenekfenyek-network
+    restart: unless-stopped
+
+  # PostgreSQL Database (előkészítés)
+  postgres:
+    image: postgres:15
+    container_name: nincsenekfenyek-postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=nincsenekfenyek
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      - nincsenekfenyek-network
+    restart: unless-stopped
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: nincsenekfenyek-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - nincsenekfenyek-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Celery Worker
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nincsenekfenyek-celery-worker
+    command: celery -A src.celery_app worker --loglevel=info
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    environment:
+      - APP_ENV=development
+      - MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
+      - POSTGRESQL_URL=postgresql://postgres:postgres@postgres:5432/nincsenekfenyek
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+    networks:
+      - nincsenekfenyek-network
+
+  # Celery Beat (Scheduler)
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nincsenekfenyek-celery-beat
+    command: celery -A src.celery_app beat --loglevel=info
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+    environment:
+      - APP_ENV=development
+      - MONGODB_URL=mongodb://mongodb:27017/nincsenekfenyek
+      - POSTGRESQL_URL=postgresql://postgres:postgres@postgres:5432/nincsenekfenyek
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      - mongodb
+      - postgres
+      - redis
+    networks:
+      - nincsenekfenyek-network
+
+volumes:
+  mongodb_data:
+  mongodb_config:
+  postgres_data:
+  redis_data:
+
+networks:
+  nincsenekfenyek-network:
+    driver: bridge
+

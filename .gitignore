@@ -41,6 +41,7 @@ env/
 .env
 .env.local
 .env.*.local
+!.env.example
 
 # Database
 *.db
@@ -77,7 +78,7 @@ temp/
 .DS_Store
 Thumbs.db
 
-# Secrets and credentials
+# Secrets and credentials - NEVER commit these!
 secrets/
 credentials/
 *.pem
@@ -100,7 +101,7 @@ known_hosts.old
 .git-credentials
 .gitconfig.local
 
-# API Keys and tokens
+# API Keys and tokens - NEVER commit these!
 *_key.txt
 *_secret.txt
 *_token.txt
@@ -108,7 +109,7 @@ known_hosts.old
 api_keys.txt
 secrets.txt
 
-# Environment files (all variants)
+# Environment files (all variants) - NEVER commit these!
 .env
 .env.*
 !.env.example
@@ -118,7 +119,7 @@ secrets.txt
 .env.test
 .env.staging
 
-# Docker
+# Docker override
 docker-compose.override.yml
 
 # Backup files
@@ -126,51 +127,31 @@ docker-compose.override.yml
 *.backup
 
 # ===========================================
-# KÓD FÁJLOK - CSAK LOKÁLISAN
+# KÓD MOST ENGEDÉLYEZETT - TESZTELÉS CÉLJÁBÓL
 # ===========================================
-# A következő fájlok NEM kerülnek a GitHub-ra,
-# csak lokálisan tárolódnak
+# A következő fájlok MOST már MEGENGEDETTEK,
+# hogy tesztelni tudjuk a GitHub-on
 
-# Source code
-src/
-!src/.gitkeep
+# Source code - ENGEDÉLYEZVE
+# src/
 
-# Application files
-*.py
-!scripts/*.sh
-!**/__init__.py
+# Application files - ENGEDÉLYEZVE (kivéve cache és compiled fájlok)
+# *.py (a __pycache__ és *.pyc már kizárva fent)
 
-# Configuration files
-docker-compose.yml
-Dockerfile
-requirements.txt
-requirements-dev.txt
+# Configuration files - ENGEDÉLYEZVE
+# docker-compose.yml
+# Dockerfile
+# requirements.txt
+# requirements-dev.txt
 
-# Test files
-tests/
-!tests/.gitkeep
+# Test files - ENGEDÉLYEZVE
+# tests/
 
-# Scripts (kivéve dokumentációs scripteket)
-scripts/
-!.github/
-!scripts/README*.md
-!scripts/*TESTING*.md
+# Scripts - ENGEDÉLYEZVE
+# scripts/
 
-# Migrations
-migrations/
-!migrations/.gitkeep
+# Migrations - ENGEDÉLYEZVE
+# migrations/
 
-# Frontend (ha lesz)
-frontend/
-!frontend/README.md
-
-# Environment and config
-.env
-.env.*
-!.env.example
-
-# Logs and data
-logs/
-data/
-*.log
-
+# Frontend (ha lesz) - ENGEDÉLYEZVE
+# frontend/
