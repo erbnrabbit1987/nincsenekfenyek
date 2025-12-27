@@ -1,5 +1,6 @@
 # Python Backend Dockerfile
-FROM python:3.11-slim
+# Using Python 3.10 to avoid segfault issues with 3.11-slim
+FROM python:3.10-slim
 
 WORKDIR /app
 
