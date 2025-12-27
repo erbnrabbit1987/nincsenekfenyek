@@ -22,18 +22,20 @@ COPY . .
 # Ensure public directory exists (Vite may need it even if empty, but it's optional)
 RUN mkdir -p ./public || true
 
-# Debug: Check what files were actually copied
-RUN set -x && \
-    echo "=== Current directory ===" && \
-    pwd && \
-    echo "=== Checking src directory ===" && \
-    ls -la src/ && \
-    echo "=== Checking if src/lib exists ===" && \
-    test -d src/lib && echo "src/lib EXISTS" || echo "src/lib DOES NOT EXIST" && \
-    echo "=== Checking src/lib directory ===" && \
-    (ls -la src/lib/ 2>&1 || echo "src/lib directory listing failed") && \
-    echo "=== Listing all TypeScript files ===" && \
-    find src -type f \( -name "*.ts" -o -name "*.tsx" \) 2>&1 | head -30
+# Verify that src/lib/api.ts exists - fail build if it doesn't
+RUN if [ ! -f src/lib/api.ts ]; then \
+        echo "ERROR: src/lib/api.ts not found!" && \
+        echo "=== Listing src directory ===" && \
+        ls -la src/ && \
+        echo "=== Listing src/lib ===" && \
+        ls -la src/lib/ 2>&1 || echo "src/lib does not exist" && \
+        echo "=== Finding all .ts files ===" && \
+        find . -name "*.ts" -type f | head -20 && \
+        exit 1; \
+    else \
+        echo "✓ src/lib/api.ts found" && \
+        head -5 src/lib/api.ts; \
+    fi
 
 # Build
 RUN npm run build
