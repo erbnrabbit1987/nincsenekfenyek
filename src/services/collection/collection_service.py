@@ -9,7 +9,7 @@ from datetime import datetime
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source, Post
 from src.services.collection.facebook_scraper import FacebookScraper
-from src.services.collection.news import MTIService
+from src.services.collection.news import MTIService, MagyarKozlonyService
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +192,63 @@ class CollectionService:
         
         return result
     
+    def collect_magyar_kozlony(
+        self,
+        source: Source,
+        max_posts: Optional[int] = None
+    ) -> Dict[str, Any]:
+        """
+        Collect official publications from Magyar Közlöny
+        
+        Args:
+            source: Source object with Magyar Közlöny configuration
+            max_posts: Maximum number of publications to collect (optional)
+            
+        Returns:
+            Dictionary with collection results
+        """
+        logger.info(f"Starting Magyar Közlöny collection for source {source._id}")
+        
+        result = {
+            'source_id': str(source._id),
+            'source_type': source.source_type,
+            'posts_found': 0,
+            'posts_saved': 0,
+            'errors': []
+        }
+        
+        try:
+            kozlony_service = MagyarKozlonyService()
+            
+            # Get configuration from source
+            max_items = max_posts or source.config.get('max_items', 50)
+            year = source.config.get('year')
+            fetch_details = source.config.get('fetch_details', False)
+            
+            # Collect publications
+            collection_result = kozlony_service.collect_publications(
+                max_items=max_items,
+                year=year,
+                store=True,
+                source_id=str(source._id),
+                fetch_details=fetch_details
+            )
+            
+            result['posts_found'] = collection_result.get('publications_fetched', 0)
+            result['posts_saved'] = collection_result.get('publications_stored', 0)
+            
+            logger.info(
+                f"Magyar Közlöny collection: found {result['posts_found']} publications, "
+                f"saved {result['posts_saved']} new publications for source {source._id}"
+            )
+        
+        except Exception as e:
+            error_msg = f"Error collecting Magyar Közlöny: {str(e)}"
+            logger.error(error_msg)
+            result['errors'].append(error_msg)
+        
+        return result
+    
     def collect_from_source(
         self,
         source: Source,
@@ -214,6 +271,10 @@ class CollectionService:
         elif source.source_type == "news":
             # MTI RSS feed collection
             return self.collect_mti_news(source, max_posts=max_posts)
+        
+        elif source.source_type == "official_publication":
+            # Magyar Közlöny collection
+            return self.collect_magyar_kozlony(source, max_posts=max_posts)
         
         elif source.source_type == "statistics":
             # Statistics collection - to be implemented

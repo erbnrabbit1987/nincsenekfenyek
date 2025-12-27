@@ -13,7 +13,7 @@ from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source
 from src.services.collection.collection_service import CollectionService
 from src.services.collection.statistics import EurostatService, KSHService
-from src.services.collection.news import MTIService
+from src.services.collection.news import MTIService, MagyarKozlonyService
 
 logger = logging.getLogger(__name__)
 
@@ -409,6 +409,57 @@ def collect_mti_feed_task(
         return {
             'success': False,
             'feed_type': feed_type,
+            'error': error_msg
+        }
+
+
+@shared_task(name="news.collect_magyar_kozlony")
+def collect_magyar_kozlony_task(
+    max_items: int = 50,
+    year: Optional[int] = None,
+    source_id: Optional[str] = None,
+    fetch_details: bool = False
+) -> Dict[str, Any]:
+    """
+    Celery task to collect publications from Magyar Közlöny
+    
+    Args:
+        max_items: Maximum number of publications to fetch
+        year: Optional year filter
+        source_id: Optional source ID for tracking
+        fetch_details: Whether to fetch detailed content
+        
+    Returns:
+        Dictionary with collection result
+    """
+    logger.info(f"Starting Magyar Közlöny collection (year: {year})")
+    
+    try:
+        kozlony_service = MagyarKozlonyService()
+        
+        # Collect publications
+        result = kozlony_service.collect_publications(
+            max_items=max_items,
+            year=year,
+            store=True,
+            source_id=source_id,
+            fetch_details=fetch_details
+        )
+        
+        logger.info(
+            f"Magyar Közlöny collection completed: "
+            f"{result['publications_fetched']} fetched, "
+            f"{result['publications_stored']} stored"
+        )
+        
+        return result
+    
+    except Exception as e:
+        error_msg = f"Error collecting Magyar Közlöny: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'year': year,
             'error': error_msg
         }
 

@@ -6,8 +6,12 @@ from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
 
-from src.services.collection.tasks import collect_facebook_posts_task, collect_mti_feed_task
-from src.services.collection.news import MTIService
+from src.services.collection.tasks import (
+    collect_facebook_posts_task,
+    collect_mti_feed_task,
+    collect_magyar_kozlony_task
+)
+from src.services.collection.news import MTIService, MagyarKozlonyService
 from src.services.core.source_service import SourceService
 from src.models.database import connect_mongodb_sync
 
@@ -287,5 +291,72 @@ async def search_mti_articles(
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error searching MTI articles: {str(e)}")
+
+
+# Magyar Közlöny endpoints
+
+@router.post("/kozlony/collect")
+async def collect_magyar_kozlony(
+    max_items: int = Query(50, description="Maximum number of publications to fetch"),
+    year: Optional[int] = Query(None, description="Year filter"),
+    fetch_details: bool = Query(False, description="Fetch detailed content"),
+    background: bool = Query(False, description="Run in background")
+):
+    """Collect official publications from Magyar Közlöny"""
+    try:
+        if background:
+            # Run as Celery task
+            task = collect_magyar_kozlony_task.delay(
+                max_items=max_items,
+                year=year,
+                fetch_details=fetch_details
+            )
+            return {
+                "success": True,
+                "task_id": task.id,
+                "message": f"Magyar Közlöny collection task started (year: {year})"
+            }
+        else:
+            # Run synchronously
+            kozlony_service = MagyarKozlonyService()
+            result = kozlony_service.collect_publications(
+                max_items=max_items,
+                year=year,
+                store=True,
+                fetch_details=fetch_details
+            )
+            
+            return {
+                "success": True,
+                "year": year,
+                "publications_fetched": result.get("publications_fetched", 0),
+                "publications_stored": result.get("publications_stored", 0)
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error collecting Magyar Közlöny: {str(e)}")
+
+
+@router.get("/kozlony/search")
+async def search_magyar_kozlony(
+    query: str = Query(..., description="Search query"),
+    year: Optional[int] = Query(None, description="Year filter"),
+    limit: int = Query(20, description="Maximum results")
+):
+    """Search for Magyar Közlöny publications"""
+    try:
+        kozlony_service = MagyarKozlonyService()
+        publications = kozlony_service.search_publications(
+            query=query,
+            year=year,
+            limit=limit
+        )
+        return {
+            "query": query,
+            "year": year,
+            "count": len(publications),
+            "publications": publications
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching Magyar Közlöny: {str(e)}")
 
 
