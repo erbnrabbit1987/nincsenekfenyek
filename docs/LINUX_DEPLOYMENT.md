@@ -561,13 +561,24 @@ docker compose logs --tail=100 backend
 
 ```bash
 # Backup könyvtár létrehozása
-mkdir -p /opt/nincsenekfenyek/backups
+mkdir -p /opt/nincsenekfenyek/nincsenekfenyek/backups
 
-# MongoDB backup
-docker compose exec mongodb mongodump --archive > /opt/nincsenekfenyek/backups/mongodb_$(date +%Y%m%d_%H%M%S).archive
+# MongoDB backup (adatkönyvtárból vagy konténerből)
+cd /opt/nincsenekfenyek/nincsenekfenyek
+docker compose exec mongodb mongodump --archive > backups/mongodb_$(date +%Y%m%d_%H%M%S).archive
+# Vagy közvetlenül az adatkönyvtárról:
+# tar -czf backups/mongodb_$(date +%Y%m%d_%H%M%S).tar.gz data/mongodb/
 
 # PostgreSQL backup
-docker compose exec postgres pg_dump -U postgres nincsenekfenyek > /opt/nincsenekfenyek/backups/postgres_$(date +%Y%m%d_%H%M%S).sql
+docker compose exec postgres pg_dump -U postgres nincsenekfenyek > backups/postgres_$(date +%Y%m%d_%H%M%S).sql
+# Vagy közvetlenül az adatkönyvtárról:
+# tar -czf backups/postgres_$(date +%Y%m%d_%H%M%S).tar.gz data/postgres/
+
+# Redis backup (adatkönyvtárról)
+tar -czf backups/redis_$(date +%Y%m%d_%H%M%S).tar.gz data/redis/
+
+# Teljes data könyvtár backup
+tar -czf backups/full_data_backup_$(date +%Y%m%d_%H%M%S).tar.gz data/
 ```
 
 ### 10.3 Update (Frissítés)

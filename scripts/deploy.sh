@@ -188,8 +188,12 @@ build_images() {
 create_directories() {
     log_info "Creating necessary directories..."
     mkdir -p "$PROJECT_ROOT/logs"
-    mkdir -p "$PROJECT_ROOT/data"
+    mkdir -p "$PROJECT_ROOT/data/mongodb"
+    mkdir -p "$PROJECT_ROOT/data/mongodb-config"
+    mkdir -p "$PROJECT_ROOT/data/postgres"
+    mkdir -p "$PROJECT_ROOT/data/redis"
     log_info "Directories created ✓"
+    log_info "Database data will be stored in: $PROJECT_ROOT/data/"
 }
 
 deploy_services() {
