@@ -6,9 +6,11 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-# Use npm install since package-lock.json might not exist yet
-RUN npm install
+# Install dependencies with retry logic and cache cleaning
+# Clean npm cache and retry on network errors
+RUN npm cache clean --force && \
+    npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 || \
+    (sleep 10 && npm cache clean --force && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000)
 
 # Copy source code
 COPY . .
