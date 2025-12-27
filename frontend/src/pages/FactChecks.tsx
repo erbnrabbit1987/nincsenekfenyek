@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { factcheckApi, type FactCheckResult } from '../lib/api';
+import { factcheckApi, type FactCheckResult } from '@/lib/api';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
