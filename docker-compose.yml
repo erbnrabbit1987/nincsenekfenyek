@@ -1,4 +1,5 @@
-version: '3.8'
+# Docker Compose version (obsolete in newer versions, kept for compatibility)
+# version: '3.8'
 
 services:
   # Backend API

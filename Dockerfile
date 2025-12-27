@@ -32,10 +32,11 @@ COPY requirements.txt .
 
 # Upgrade pip, setuptools, wheel first to avoid segfault issues
 # Use setuptools <70 to fix langdetect build issues
-# Limit pip memory usage
-RUN pip install --upgrade pip wheel setuptools && \
+# Limit pip memory usage and verify Python
+RUN pip install --upgrade pip wheel && \
     pip install "setuptools<70" && \
-    python -c "import sys; print(f'Python version: {sys.version}')"
+    python -c "import sys; print(f'Python version: {sys.version}')" && \
+    python -c "import gc; gc.collect()"  # Force garbage collection to free memory
 
 # Install core dependencies first (small, essential packages)
 # Install one by one to minimize memory usage and avoid segfault
@@ -83,25 +84,22 @@ RUN pip install --no-cache-dir \
     sentencepiece==0.1.99 || echo "Warning: Some NLP packages failed"
 
 # Skip langdetect (known build issues) - code has fallback
-# Install other packages
-RUN pip install --no-cache-dir \
-    APScheduler==3.10.4 \
-    python-json-logger==2.0.7 \
-    python-dateutil==2.8.2
+# Install other packages (one by one to avoid segfault)
+RUN pip install --no-cache-dir APScheduler==3.10.4 || echo "Warning: APScheduler failed" && \
+    pip install --no-cache-dir python-json-logger==2.0.7 || echo "Warning: python-json-logger failed" && \
+    pip install --no-cache-dir python-dateutil==2.8.2 || echo "Warning: python-dateutil failed"
 
-# Install testing (optional, can skip if build fails)
-RUN pip install --no-cache-dir \
-    pytest==7.4.3 \
-    pytest-asyncio==0.21.1 \
-    pytest-cov==4.1.0 \
-    faker==20.1.0 || echo "Warning: Testing packages failed"
+# Install testing (optional, one by one, can skip if build fails)
+RUN pip install --no-cache-dir pytest==7.4.3 || echo "Warning: pytest failed" && \
+    pip install --no-cache-dir pytest-asyncio==0.21.1 || echo "Warning: pytest-asyncio failed" && \
+    pip install --no-cache-dir pytest-cov==4.1.0 || echo "Warning: pytest-cov failed" && \
+    pip install --no-cache-dir faker==20.1.0 || echo "Warning: faker failed"
 
-# Install code quality tools (optional)
-RUN pip install --no-cache-dir \
-    black==23.11.0 \
-    flake8==6.1.0 \
-    mypy==1.7.1 \
-    isort==5.12.0 || echo "Warning: Code quality packages failed"
+# Install code quality tools (optional, one by one)
+RUN pip install --no-cache-dir black==23.11.0 || echo "Warning: black failed" && \
+    pip install --no-cache-dir flake8==6.1.0 || echo "Warning: flake8 failed" && \
+    pip install --no-cache-dir mypy==1.7.1 || echo "Warning: mypy failed" && \
+    pip install --no-cache-dir isort==5.12.0 || echo "Warning: isort failed"
 
 # Copy application code
 COPY src/ ./src/
