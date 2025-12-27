@@ -64,6 +64,10 @@ if [ "$HELP" = true ]; then
     echo "  ./scripts/deploy.sh                          # Development deployment"
     echo "  ./scripts/deploy.sh -e production -b        # Production with build"
     echo "  ./scripts/deploy.sh -c                       # Clean deployment"
+    echo ""
+    echo "Note:"
+    echo "  If .env file is missing, the script will prompt for interactive creation."
+    echo "  You can also manually run: ./scripts/interactive-env-setup.sh"
     exit 0
 fi
 
@@ -108,14 +112,54 @@ check_env_file() {
     log_info "Checking environment configuration..."
     
     if [ ! -f "$PROJECT_ROOT/.env" ]; then
-        log_warn ".env file not found. Creating from .env.example..."
-        if [ -f "$PROJECT_ROOT/.env.example" ]; then
+        log_warn ".env file not found."
+        
+        # Interaktív .env létrehozás opció
+        if [ -f "$PROJECT_ROOT/scripts/interactive-env-setup.sh" ]; then
+            echo ""
+            echo "Válassz egy opciót:"
+            echo "  1) Interaktív .env létrehozás (ajánlott)"
+            echo "  2) .env.example másolása"
+            echo "  3) Kihagyás (folytatás .env nélkül)"
+            read -p "Választás [1-3] (1): " env_choice
+            env_choice="${env_choice:-1}"
+            
+            case $env_choice in
+                1)
+                    log_info "Interaktív .env létrehozás indítása..."
+                    "$PROJECT_ROOT/scripts/interactive-env-setup.sh"
+                    if [ $? -eq 0 ] && [ -f "$PROJECT_ROOT/.env" ]; then
+                        log_info "Environment file created ✓"
+                        return 0
+                    else
+                        log_error "Failed to create .env file interactively"
+                        exit 1
+                    fi
+                    ;;
+                2)
+                    if [ -f "$PROJECT_ROOT/.env.example" ]; then
+                        cp "$PROJECT_ROOT/.env.example" "$PROJECT_ROOT/.env"
+                        log_warn "Please edit .env file with your configuration before continuing."
+                        log_warn "Press Enter to continue or Ctrl+C to cancel..."
+                        read -r
+                    else
+                        log_error ".env.example file not found. Cannot create .env file."
+                        exit 1
+                    fi
+                    ;;
+                3)
+                    log_warn "Continuing without .env file..."
+                    return 0
+                    ;;
+            esac
+        elif [ -f "$PROJECT_ROOT/.env.example" ]; then
             cp "$PROJECT_ROOT/.env.example" "$PROJECT_ROOT/.env"
             log_warn "Please edit .env file with your configuration before continuing."
             log_warn "Press Enter to continue or Ctrl+C to cancel..."
             read -r
         else
             log_error ".env.example file not found. Cannot create .env file."
+            log_error "Please create .env file manually or run: ./scripts/interactive-env-setup.sh"
             exit 1
         fi
     else
