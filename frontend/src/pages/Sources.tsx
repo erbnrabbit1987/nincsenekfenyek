@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { sourcesApi, collectionApi, type Source } from '@/lib/api';
+import { sourcesApi, collectionApi, type Source } from '../lib/api';
 import { Plus, Play, Trash2, Edit } from 'lucide-react';
 import { useState } from 'react';
 

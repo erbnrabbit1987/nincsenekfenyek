@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { collectionApi, type Post } from '@/lib/api';
+import { collectionApi, type Post } from '../lib/api';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Calendar } from 'lucide-react';
 import { format } from 'date-fns';

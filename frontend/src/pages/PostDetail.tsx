@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { collectionApi, factcheckApi, type Post, type FactCheckResult } from '@/lib/api';
+import { collectionApi, factcheckApi, type Post, type FactCheckResult } from '../lib/api';
 import { ArrowLeft, CheckCircle2, ExternalLink } from 'lucide-react';
 import { format } from 'date-fns';
 import { hu } from 'date-fns/locale';

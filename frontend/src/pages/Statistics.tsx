@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { statisticsApi } from '@/lib/api';
+import { statisticsApi } from '../lib/api';
 import { Search, Database, TrendingUp } from 'lucide-react';
 
 export default function Statistics() {
