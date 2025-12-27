@@ -24,6 +24,7 @@ except ImportError:
 
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Post, FactCheckResult
+from src.services.search import GoogleSearchService, BingSearchService
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +36,9 @@ class FactCheckService:
         self.db = connect_mongodb_sync()
         self.nlp = None
         self._load_nlp_model()
+        # Initialize search services
+        self.google_search = GoogleSearchService()
+        self.bing_search = BingSearchService()
     
     def _load_nlp_model(self):
         """Load Hungarian NLP model"""
@@ -235,7 +239,30 @@ class FactCheckService:
                     'relevance_score': 1.0
                 })
         
-        # TODO: Implement search engines integration (Google, Bing)
+        # Search using Google Custom Search API
+        if self.google_search.is_configured():
+            try:
+                google_results = self.google_search.search_for_fact_check(
+                    claim=claim,
+                    keywords=keywords,
+                    num_results=5
+                )
+                references.extend(google_results)
+            except Exception as e:
+                logger.error(f"Error searching with Google: {e}")
+        
+        # Search using Bing Web Search API (as fallback or additional source)
+        if self.bing_search.is_configured() and len(references) < 5:
+            try:
+                bing_results = self.bing_search.search_for_fact_check(
+                    claim=claim,
+                    keywords=keywords,
+                    num_results=5
+                )
+                references.extend(bing_results)
+            except Exception as e:
+                logger.error(f"Error searching with Bing: {e}")
+        
         # TODO: Implement EUROSTAT API integration
         # TODO: Implement fact-checking websites search
         

@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "logs/app.log"
     
+    # Search APIs
+    GOOGLE_SEARCH_API_KEY: str = ""
+    GOOGLE_SEARCH_ENGINE_ID: str = ""
+    BING_SEARCH_API_KEY: str = ""
+    
     class Config:
         env_file = ".env"
         case_sensitive = True

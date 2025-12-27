@@ -250,6 +250,34 @@ esac
 ask_with_default "Log fájl elérési út" "logs/app.log" LOG_FILE
 
 # ===========================================
+# Search API Beállítások (Opcionális)
+# ===========================================
+echo ""
+echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+echo -e "${CYAN}  Search API Beállítások (Opcionális)${NC}"
+echo -e "${CYAN}═══════════════════════════════════════════════════════════${NC}"
+echo ""
+echo -e "${YELLOW}Megjegyzés:${NC} A Search API kulcsok opcionálisak."
+echo "A fact-checking funkciók működnek nélkülük is (korlátozottan)."
+echo ""
+
+if ask_yes_no "Szeretnéd beállítani a Google Custom Search API-t?" "n"; then
+    ask_with_default "Google Search API Key" "" GOOGLE_SEARCH_API_KEY
+    ask_with_default "Google Search Engine ID (CX)" "" GOOGLE_SEARCH_ENGINE_ID
+    echo -e "${GREEN}✓${NC} Google Search API beállítva"
+else
+    GOOGLE_SEARCH_API_KEY=""
+    GOOGLE_SEARCH_ENGINE_ID=""
+fi
+
+if ask_yes_no "Szeretnéd beállítani a Bing Web Search API-t?" "n"; then
+    ask_with_default "Bing Search API Key" "" BING_SEARCH_API_KEY
+    echo -e "${GREEN}✓${NC} Bing Search API beállítva"
+else
+    BING_SEARCH_API_KEY=""
+fi
+
+# ===========================================
 # .env Fájl Létrehozása
 # ===========================================
 echo ""
@@ -316,6 +344,14 @@ CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
 
 LOG_LEVEL=${LOG_LEVEL}
 LOG_FILE=${LOG_FILE}
+
+# ===========================================
+# Search API Beállítások (Opcionális)
+# ===========================================
+
+GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
+GOOGLE_SEARCH_ENGINE_ID=${GOOGLE_SEARCH_ENGINE_ID}
+BING_SEARCH_API_KEY=${BING_SEARCH_API_KEY}
 EOF
 
 # Jogosultságok beállítása
