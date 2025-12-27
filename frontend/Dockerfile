@@ -16,7 +16,13 @@ RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20
     (sleep 15 && npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20000 --prefer-offline --no-audit)
 
 # Copy source code - copy files explicitly to ensure everything is included
-COPY src ./src
+# Copy lib directory first to ensure it's included
+COPY src/lib ./src/lib
+COPY src/pages ./src/pages
+COPY src/components ./src/components
+COPY src/*.ts ./src/
+COPY src/*.tsx ./src/ 2>/dev/null || true
+COPY src/*.css ./src/ 2>/dev/null || true
 COPY index.html ./
 COPY vite.config.ts ./
 COPY tsconfig.json ./
