@@ -3,7 +3,7 @@ Celery Tasks for Data Collection
 """
 import logging
 from datetime import datetime, timedelta
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 
 from celery import shared_task
 from celery.schedules import crontab
