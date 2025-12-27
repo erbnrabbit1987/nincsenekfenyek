@@ -29,12 +29,15 @@ ask_with_default() {
     local default="$2"
     local var_name="$3"
     local value
+    local prompt_text
     
     if [ -n "$default" ]; then
-        read -p "$(echo -e ${CYAN}$prompt ${YELLOW}[$default]: ${NC})" value
+        prompt_text=$(echo -e "${CYAN}$prompt ${YELLOW}[$default]: ${NC}")
+        read -p "$prompt_text" value
         value="${value:-$default}"
     else
-        read -p "$(echo -e ${CYAN}$prompt: ${NC})" value
+        prompt_text=$(echo -e "${CYAN}$prompt: ${NC}")
+        read -p "$prompt_text" value
     fi
     
     eval "$var_name='$value'"
@@ -44,12 +47,15 @@ ask_yes_no() {
     local prompt="$1"
     local default="${2:-n}"
     local answer
+    local prompt_text
     
     if [ "$default" = "y" ]; then
-        read -p "$(echo -e ${CYAN}$prompt ${YELLOW}[I/n]: ${NC})" answer
+        prompt_text=$(echo -e "${CYAN}$prompt ${YELLOW}[I/n]: ${NC}")
+        read -p "$prompt_text" answer
         answer="${answer:-i}"
     else
-        read -p "$(echo -e ${CYAN}$prompt ${YELLOW}[i/N]: ${NC})" answer
+        prompt_text=$(echo -e "${CYAN}$prompt ${YELLOW}[i/N]: ${NC}")
+        read -p "$prompt_text" answer
         answer="${answer:-n}"
     fi
     
@@ -149,7 +155,8 @@ echo ""
 echo "Használsz Docker-t?"
 echo "  1) Igen (Docker Compose)"
 echo "  2) Nem (lokális telepítés)"
-read -p "$(echo -e ${CYAN}Választás [1-2] (1): ${NC})" docker_choice
+docker_prompt=$(echo -e "${CYAN}Választás [1-2] (1): ${NC}")
+read -p "$docker_prompt" docker_choice
 docker_choice="${docker_choice:-1}"
 
 if [ "$docker_choice" = "1" ]; then
