@@ -22,7 +22,10 @@ COPY . .
 RUN mkdir -p ./public || true
 
 # Debug: Check if lib/api.ts exists before build
-RUN ls -la src/lib/ 2>/dev/null || echo "src/lib not found, listing src:" && ls -la src/ || echo "src not found"
+RUN echo "=== Checking src/lib directory ===" && \
+    ls -la src/lib/ 2>/dev/null && \
+    echo "=== Checking api.ts file ===" && \
+    cat src/lib/api.ts | head -5 || echo "api.ts not found"
 
 # Build
 RUN npm run build

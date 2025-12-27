@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { collectionApi, sourcesApi, factcheckApi, type Source, type Post, type FactCheckResult } from '@/lib/api';
+import { collectionApi, sourcesApi, factcheckApi, type Source, type Post, type FactCheckResult } from '../lib/api';
 import { FileText, Database, CheckCircle2, Activity } from 'lucide-react';
 
 export default function Dashboard() {
