@@ -5,8 +5,12 @@ from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
-from src.services.collection.statistics import EurostatService
-from src.services.collection.tasks import collect_eurostat_dataset_task, update_eurostat_datasets_task
+from src.services.collection.statistics import EurostatService, KSHService
+from src.services.collection.tasks import (
+    collect_eurostat_dataset_task,
+    update_eurostat_datasets_task,
+    collect_ksh_dataset_task
+)
 from src.models.database import connect_mongodb_sync
 
 router = APIRouter(prefix="/api/statistics", tags=["statistics"])
@@ -203,4 +207,137 @@ async def update_eurostat_datasets(
             return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error updating datasets: {str(e)}")
+
+
+# KSH (Hungarian Statistics) endpoints
+
+@router.get("/ksh/search", response_model=DatasetSearchResponse)
+async def search_ksh_datasets(
+    query: str = Query(..., description="Search query"),
+    language: str = Query("hu", description="Language code")
+):
+    """Search for KSH (Hungarian statistics) datasets"""
+    try:
+        ksh_service = KSHService()
+        results = ksh_service.search_datasets(query, language)
+        return {
+            "query": query,
+            "results": results
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error searching KSH datasets: {str(e)}")
+
+
+@router.get("/ksh/dataset/{dataset_code}", response_model=DatasetInfoResponse)
+async def get_ksh_dataset_info(
+    dataset_code: str,
+    source: str = Query("auto", description="Source type: auto, eurostat_hu, ksh_stadat")
+):
+    """Get KSH dataset information"""
+    try:
+        ksh_service = KSHService()
+        info = ksh_service.get_dataset_info(dataset_code, source)
+        
+        if not info:
+            raise HTTPException(status_code=404, detail=f"KSH dataset {dataset_code} not found")
+        
+        return {
+            "code": info.get("code", dataset_code),
+            "label": info.get("label", dataset_code),
+            "source": info.get("source", "ksh"),
+            "metadata": info
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting KSH dataset info: {str(e)}")
+
+
+@router.post("/ksh/collect/{dataset_code}", response_model=DatasetCollectionResponse)
+async def collect_ksh_dataset(
+    dataset_code: str,
+    last_n_periods: int = Query(10, description="Number of latest time periods"),
+    store: bool = Query(True, description="Store in MongoDB"),
+    source: str = Query("auto", description="Source type: auto, eurostat_hu, ksh_stadat"),
+    background: bool = Query(False, description="Run in background")
+):
+    """Collect KSH dataset (synchronously or as background task)"""
+    try:
+        if background:
+            # Run as Celery task
+            task = collect_ksh_dataset_task.delay(
+                dataset_code=dataset_code,
+                last_n_periods=last_n_periods,
+                store=store,
+                source=source
+            )
+            return {
+                "success": True,
+                "dataset_code": dataset_code,
+                "task_id": task.id,
+                "message": f"Collection task started for KSH dataset {dataset_code}"
+            }
+        else:
+            # Run synchronously
+            ksh_service = KSHService()
+            dataset_data = ksh_service.collect_dataset(
+                dataset_code=dataset_code,
+                last_n_periods=last_n_periods,
+                store=store,
+                source=source
+            )
+            
+            if dataset_data:
+                return {
+                    "success": True,
+                    "dataset_code": dataset_code,
+                    "message": f"KSH dataset {dataset_code} collected successfully"
+                }
+            else:
+                raise HTTPException(
+                    status_code=500,
+                    detail=f"Failed to collect KSH dataset {dataset_code}"
+                )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error collecting KSH dataset: {str(e)}")
+
+
+@router.get("/ksh/stored/{dataset_code}")
+async def get_stored_ksh_dataset(dataset_code: str):
+    """Get stored KSH dataset from MongoDB"""
+    try:
+        ksh_service = KSHService()
+        stored_data = ksh_service.get_stored_dataset(dataset_code)
+        
+        if not stored_data:
+            raise HTTPException(
+                status_code=404,
+                detail=f"KSH dataset {dataset_code} not found in database"
+            )
+        
+        return stored_data
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving stored KSH dataset: {str(e)}")
+
+
+@router.get("/ksh/stored")
+async def list_stored_ksh_datasets():
+    """List all stored KSH datasets"""
+    try:
+        db = connect_mongodb_sync()
+        datasets = list(db.statistics.find(
+            {"source": "ksh"},
+            {"dataset_code": 1, "metadata": 1, "updated_at": 1, "collected_at": 1}
+        ))
+        
+        return {
+            "count": len(datasets),
+            "datasets": datasets
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing KSH datasets: {str(e)}")
 

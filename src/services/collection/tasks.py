@@ -12,7 +12,7 @@ from bson import ObjectId
 from src.models.database import connect_mongodb_sync
 from src.models.mongodb_models import Source
 from src.services.collection.collection_service import CollectionService
-from src.services.collection.statistics import EurostatService
+from src.services.collection.statistics import EurostatService, KSHService
 
 logger = logging.getLogger(__name__)
 
@@ -295,6 +295,68 @@ def update_eurostat_datasets_task(
         logger.error(error_msg, exc_info=True)
         return {
             'success': False,
+            'error': error_msg
+        }
+
+
+@shared_task(name="statistics.collect_ksh_dataset")
+def collect_ksh_dataset_task(
+    dataset_code: str,
+    filters: Optional[Dict[str, List[str]]] = None,
+    last_n_periods: int = 10,
+    store: bool = True,
+    source: str = "auto"
+) -> Dict[str, Any]:
+    """
+    Celery task to collect KSH dataset
+    
+    Args:
+        dataset_code: KSH dataset code
+        filters: Optional dimension filters
+        last_n_periods: Number of latest time periods to fetch
+        store: Whether to store in MongoDB
+        source: Source type ("auto", "eurostat_hu", "ksh_stadat")
+        
+    Returns:
+        Dictionary with collection result
+    """
+    logger.info(f"Starting KSH dataset collection: {dataset_code}")
+    
+    try:
+        ksh_service = KSHService()
+        
+        # Collect dataset
+        dataset_data = ksh_service.collect_dataset(
+            dataset_code=dataset_code,
+            filters=filters,
+            last_n_periods=last_n_periods,
+            store=store,
+            source=source
+        )
+        
+        if dataset_data:
+            logger.info(f"KSH dataset {dataset_code} collected successfully")
+            return {
+                'success': True,
+                'dataset_code': dataset_code,
+                'data_points': len(dataset_data.get('value', [])) if isinstance(dataset_data, dict) else 0,
+                'stored': store,
+                'source': dataset_data.get('source', source)
+            }
+        else:
+            logger.warning(f"KSH dataset {dataset_code} collection failed")
+            return {
+                'success': False,
+                'dataset_code': dataset_code,
+                'error': 'Failed to retrieve dataset data'
+            }
+    
+    except Exception as e:
+        error_msg = f"Error collecting KSH dataset {dataset_code}: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        return {
+            'success': False,
+            'dataset_code': dataset_code,
             'error': error_msg
         }
 
