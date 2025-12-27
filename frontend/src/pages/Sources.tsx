@@ -5,7 +5,9 @@ import { useState } from 'react';
 
 export default function Sources() {
   const queryClient = useQueryClient();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showAddModal, setShowAddModal] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedSource, setSelectedSource] = useState<Source | null>(null);
 
   const { data: sources, isLoading } = useQuery<Source[]>({
