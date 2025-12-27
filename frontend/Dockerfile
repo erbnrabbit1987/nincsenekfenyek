@@ -18,6 +18,10 @@ RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20
 # Copy source code
 COPY . .
 
+# Verify that lib/api.ts exists (debug)
+RUN ls -la src/lib/ || echo "src/lib directory not found!" && \
+    cat src/lib/api.ts | head -5 || echo "api.ts not found!"
+
 # Build
 RUN npm run build
 
