@@ -23,8 +23,8 @@ COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
-# Ensure public directory exists (Vite may need it even if empty)
-RUN mkdir -p ./public
+# Ensure public directory exists (Vite may need it even if empty, but it's optional)
+RUN mkdir -p ./public || true
 
 # Build
 RUN npm run build
