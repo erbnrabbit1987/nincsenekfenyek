@@ -17,13 +17,14 @@ RUN npm install --legacy-peer-deps --fetch-retries=5 --fetch-retry-mintimeout=20
 
 # Copy source code (copy src directory first to ensure it's included)
 COPY src ./src
-COPY public ./public 2>/dev/null || true
 COPY index.html ./
 COPY vite.config.ts ./
 COPY tsconfig.json ./
 COPY tsconfig.node.json ./
 COPY tailwind.config.js ./
 COPY postcss.config.js ./
+# Ensure public directory exists (Vite may need it even if empty)
+RUN mkdir -p ./public
 
 # Build
 RUN npm run build
